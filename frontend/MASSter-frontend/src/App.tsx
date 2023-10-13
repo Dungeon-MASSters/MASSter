@@ -1,4 +1,4 @@
-import { Link, Redirect, Route, Switch } from "wouter";
+import { Link, Redirect, Route, Router, Switch } from "wouter";
 import { pb } from "./lib/pb-client";
 import { AuthPage } from "./pages/auth";
 import { invalidateUser, logoutUser, useUser } from "./lib/use-user";
@@ -8,6 +8,7 @@ import { IconLoader } from "@tabler/icons-react";
 import { FullscreenLoader } from "./components/loaders";
 import { MainPage } from "./pages/main";
 import { GridPage } from "./pages/grid";
+import { AddPromptPage } from "./pages/add-prompt";
 
 function App() {
     const {
@@ -52,6 +53,12 @@ function App() {
                 >
                     Grid
                 </Link>
+                <Link
+                    href="/generate"
+                    className="bg-primary p-2 rounded text-input"
+                >
+                    Add
+                </Link>
                 <Button
                     onClick={() => {
                         console.log("logout");
@@ -66,6 +73,9 @@ function App() {
             <Switch>
                 <Route path="/" component={MainPage} />
                 <Route path="/grid" component={GridPage} />
+                <Route path="/generate">
+                    <AddPromptPage />
+                </Route>
                 <Route>
                     <Redirect to="/" />
                 </Route>
