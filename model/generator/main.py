@@ -31,7 +31,7 @@ class Pipeline:
 
                 if len(records.items) == 0:
                     logger.info(f'Не найдено ожидающих запросов')
-                    time.sleep(10)
+                    time.sleep(3)
                     continue
 
                 # self.pb.collection('text_generation_mvp').update(
@@ -52,6 +52,14 @@ class Pipeline:
                     logger.error('Не было создано ни одного изображения')
                     continue
 
+                self.pb.collection('text_generation_mvp').update(
+                    id=records.items[0].id,
+                    body_params={
+                        "status": "generated",
+                        "output_image": ""
+                    }
+                )
+
                 paths = []
                 uploads = []
                 pathlib.Path('tmp').mkdir(parents=True, exist_ok=True)
@@ -64,33 +72,28 @@ class Pipeline:
                 self.pb.collection('text_generation_mvp').update(
                     id=records.items[0].id,
                     body_params={
-                        "status": "finished",
+                        "status": "generated",
                         "output_image": FileUpload(*uploads)
                     }
                 )
 
             except:
-                raise
                 logger.error('Ошибка при чтении коллекции')
                 time.sleep(3)
 
     def process_generation(self, data) -> list[Image.Image]:
-        images = []
-        print(data.status)
+        # self.pb.get_file_url(data, filename=f'tmp/{data.record.image}')
 
-        if data.status == 'open':
-            # self.pb.get_file_url(data, filename=f'tmp/{data.record.image}')
-
-            images = self.model.generate(
-                num_steps=200,
-                guidance_scale=4.0,
-                height=300,
-                width=500,
-                prompt=data.prompt,
-                style=data.style,
-                negative_prompt=data.negative_prompt,
-                num_images=data.num_images
-            )
+        images = self.model.generate(
+            num_steps=200,
+            guidance_scale=4.0,
+            height=300,
+            width=500,
+            prompt=data.prompt,
+            style=data.style,
+            negative_prompt=data.negative_prompt,
+            num_images=data.num_images
+        )
 
         return images
 

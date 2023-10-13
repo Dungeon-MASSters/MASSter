@@ -44,6 +44,8 @@ class ImageGenerationModel:
         negative_prompt: str,
         num_images: int) -> list[Image.Image]:
 
+        if prompt == '': return []
+
         if negative_prompt == '':
             negative_prompt = (
                 'lowres, text, error, cropped, worst quality, '
