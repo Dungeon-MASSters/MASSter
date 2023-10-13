@@ -1,16 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { pb } from "@/lib/pb-client";
-import { IconBrandVk, IconBrandYandex } from "@tabler/icons-react";
+import { IconBrandVk, IconBrandYandex, IconLoader3 } from "@tabler/icons-react";
 import { RecordAuthResponse, RecordModel } from "pocketbase";
 import { useQuery } from "react-query";
 
-async function authWithVK() {
-    return await pb.collection("users").authWithOAuth2({ provider: "vk" });
+function authWithVK() {
+    return pb.collection("users").authWithOAuth2({ provider: "vk" });
 }
 
-async function authWithYandex() {
-    return await pb.collection("users").authWithOAuth2({ provider: "yandex" });
+function authWithYandex() {
+    return pb.collection("users").authWithOAuth2({ provider: "yandex" });
 }
 
 type authPageProps = {
@@ -22,6 +22,13 @@ export function AuthPage({ onSuccess, onError }: authPageProps) {
     const authVKQuery = useQuery(["auth-with-vk"], () => authWithVK(), {
         enabled: false
     });
+    const authYandexQuery = useQuery(
+        ["auth-with-yandex"],
+        () => authWithYandex(),
+        {
+            enabled: false
+        }
+    );
 
     return (
         <div className="flex justify-center p-4">
@@ -32,31 +39,52 @@ export function AuthPage({ onSuccess, onError }: authPageProps) {
 
                 <CardContent className="gap-2 flex-col flex">
                     <Button
-                        onClick={() => {
-                            authWithVK()
-                                .then((userData) => {
-                                    onSuccess(userData);
+                        onClick={() =>
+                            authVKQuery
+                                .refetch()
+                                .then(() => {
+                                    if (authVKQuery.data) {
+                                        onSuccess(authVKQuery.data);
+                                    }
                                 })
-                                .catch((err) => {
-                                    onError(err);
-                                });
-                        }}
+                                .catch((err) => onError(err))
+                        }
                         className="flex gap-1 w-full"
+                        disabled={authVKQuery.isFetching}
                     >
                         <span>Войти через</span>
-                        <IconBrandVk strokeWidth="1.5" className="text-input" />
+                        {authVKQuery.isFetching ? (
+                            <IconLoader3
+                                strokeWidth="1.5"
+                                className="animate-spin"
+                            />
+                        ) : (
+                            <IconBrandVk strokeWidth="1.5" />
+                        )}
                     </Button>
                     <Button
-                        onClick={() => {
-                            alert("TODO");
-                        }}
+                        onClick={() =>
+                            authYandexQuery
+                                .refetch()
+                                .then(() => {
+                                    if (authYandexQuery.data) {
+                                        onSuccess(authYandexQuery.data);
+                                    }
+                                })
+                                .catch((err) => onError(err))
+                        }
                         className="flex gap-1 w-full"
+                        disabled={authYandexQuery.isFetching}
                     >
                         <span>Войти через</span>
-                        <IconBrandYandex
-                            strokeWidth="1.5"
-                            className="text-input"
-                        />
+                        {authYandexQuery.isFetching ? (
+                            <IconLoader3
+                                strokeWidth="1.5"
+                                className="animate-spin"
+                            />
+                        ) : (
+                            <IconBrandYandex strokeWidth="1.5" />
+                        )}
                     </Button>
                 </CardContent>
             </Card>
