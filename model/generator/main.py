@@ -24,7 +24,7 @@ class Pipeline:
                     page=1,
                     per_page=1,
                     query_params={
-                        "filter": 'status = "open"',
+                        "filter": 'status = "preprocessed"',
                         "sort": '-created'
                     }
                 )
