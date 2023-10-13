@@ -20,12 +20,10 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "react-query";
 import { pb } from "@/lib/pb-client";
 import { useUser } from "@/lib/use-user";
 import { useState } from "react";
-import { FullscreenLoader } from "@/components/loaders";
-import { IconLoader3 } from "@tabler/icons-react";
+import { IconBug, IconLoader3 } from "@tabler/icons-react";
 
 const ACCEPTED_IMAGE_TYPES = ["video/mp4"];
 
@@ -52,12 +50,12 @@ export function AddSimplePromptCard() {
     const onSubmit: SubmitHandler<z.infer<typeof FormSchema>> = (data) => {
         console.log("submit", data);
         const formData = new FormData();
+        formData.append("video", data.video);
         formData.append("created_by", user.data?.record.id ?? "");
         formData.append("num_images", "3");
         formData.append("status", "open");
-        formData.append("video", data.video);
         pb.collection("text_generation_mvp")
-            .create(data)
+            .create(formData)
             .then((res) => {
                 // redirect to list
                 console.log(res);
@@ -66,6 +64,7 @@ export function AddSimplePromptCard() {
                 // show fuck message
                 console.error(err);
                 setIsError(true);
+                setIsSubmited(false);
             });
         setIsSubmited(true);
     };
@@ -83,42 +82,50 @@ export function AddSimplePromptCard() {
                 {isSubmited ? (
                     <IconLoader3 className="text-primary animate-spin mx-auto" />
                 ) : (
-                    <Form {...form}>
-                        <form
-                            onSubmit={form.handleSubmit(onSubmit)}
-                            className="flex flex-col gap-2"
-                        >
-                            <FormField
-                                control={form.control}
-                                name="video"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Видеоролик</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="file"
-                                                placeholder="shadcn"
-                                                accept="video/mp4"
-                                                onBlur={field.onBlur}
-                                                onChange={(e) =>
-                                                    field.onChange(
-                                                        e.target.files?.[0]
-                                                    )
-                                                }
-                                            />
-                                        </FormControl>
-                                        <FormDescription>
-                                            Видеоролик, на основе которого будет
-                                            сгенирована обложка
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                    <>
+                        {isError && (
+                            <div className="flex gap-1 text-red-500">
+                                <IconBug />
+                                <span>не получилось запустить генерацию</span>
+                            </div>
+                        )}
+                        <Form {...form}>
+                            <form
+                                onSubmit={form.handleSubmit(onSubmit)}
+                                className="flex flex-col gap-2"
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name="video"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Видеоролик</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="file"
+                                                    placeholder="shadcn"
+                                                    accept="video/mp4"
+                                                    onBlur={field.onBlur}
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.files?.[0]
+                                                        )
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Видеоролик, на основе которого
+                                                будет сгенирована обложка
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
-                            <Button type="submit">Сгенерировать</Button>
-                        </form>
-                    </Form>
+                                <Button type="submit">Сгенерировать</Button>
+                            </form>
+                        </Form>
+                    </>
                 )}
             </CardContent>
         </Card>
