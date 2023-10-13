@@ -7,6 +7,7 @@ import { useQueryClient } from "react-query";
 import { IconLoader } from "@tabler/icons-react";
 import { FullscreenLoader } from "./components/loaders";
 import { MainPage } from "./pages/main";
+import { GridPage } from "./pages/grid";
 
 function App() {
     const {
@@ -45,6 +46,12 @@ function App() {
                 >
                     Some page
                 </Link>
+                <Link
+                    href="/grid"
+                    className="bg-primary p-2 rounded text-input"
+                >
+                    Grid
+                </Link>
                 <Button
                     onClick={() => {
                         console.log("logout");
@@ -58,6 +65,7 @@ function App() {
 
             <Switch>
                 <Route path="/" component={MainPage} />
+                <Route path="/grid" component={GridPage} />
                 <Route>
                     <Redirect to="/" />
                 </Route>
