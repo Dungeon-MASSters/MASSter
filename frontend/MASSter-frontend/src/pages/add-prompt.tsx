@@ -24,10 +24,13 @@ import { pb } from "@/lib/pb-client";
 import { useUser } from "@/lib/use-user";
 import { useState } from "react";
 import { IconBug, IconLoader3 } from "@tabler/icons-react";
+import { useLocation } from "wouter";
 
 const ACCEPTED_IMAGE_TYPES = ["video/mp4"];
 
 export function AddSimplePromptCard() {
+    const [_, navigate] = useLocation();
+
     const [isSubmited, setIsSubmited] = useState(false);
     const [isError, setIsError] = useState(false);
 
@@ -56,12 +59,10 @@ export function AddSimplePromptCard() {
         formData.append("status", "open");
         pb.collection("text_generation_mvp")
             .create(formData)
-            .then((res) => {
-                // redirect to list
-                console.log(res);
+            .then(() => {
+                navigate("/grid");
             })
             .catch((err) => {
-                // show fuck message
                 console.error(err);
                 setIsError(true);
                 setIsSubmited(false);
