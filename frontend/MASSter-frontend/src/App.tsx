@@ -1,10 +1,8 @@
-import { Link, Redirect, Route, Router, Switch } from "wouter";
-import { pb } from "./lib/pb-client";
+import { Link, Redirect, Route,  Switch } from "wouter";
 import { AuthPage } from "./pages/auth";
 import { invalidateUser, logoutUser, useUser } from "./lib/use-user";
 import { Button } from "./components/ui/button";
 import { useQueryClient } from "react-query";
-import { IconLoader } from "@tabler/icons-react";
 import { FullscreenLoader } from "./components/loaders";
 import { MainPage } from "./pages/main";
 import { GridPage } from "./pages/grid";
@@ -25,7 +23,7 @@ function App() {
     if (!isAuthed) {
         return (
             <AuthPage
-                onSuccess={(user) => {
+                onSuccess={() => {
                     console.log("user is authed");
                     invalidateUser(qc).then(() => refetchUser());
                 }}
