@@ -20,13 +20,17 @@ type authPageProps = {
 
 export function AuthPage({ onSuccess, onError }: authPageProps) {
     const authVKQuery = useQuery(["auth-with-vk"], () => authWithVK(), {
-        enabled: false
+        enabled: false,
+        onSuccess: onSuccess,
+        onError: onError
     });
     const authYandexQuery = useQuery(
         ["auth-with-yandex"],
         () => authWithYandex(),
         {
-            enabled: false
+            enabled: false,
+            onSuccess: onSuccess,
+            onError: onError
         }
     );
 
@@ -39,51 +43,35 @@ export function AuthPage({ onSuccess, onError }: authPageProps) {
 
                 <CardContent className="gap-2 flex-col flex">
                     <Button
-                        onClick={() =>
-                            authVKQuery
-                                .refetch()
-                                .then(() => {
-                                    if (authVKQuery.data) {
-                                        onSuccess(authVKQuery.data);
-                                    }
-                                })
-                                .catch((err) => onError(err))
-                        }
+                        onClick={() => authVKQuery.refetch()}
                         className="flex gap-1 w-full"
-                        disabled={authVKQuery.isFetching}
+                        disabled={
+                            authVKQuery.isFetching || authYandexQuery.isFetching
+                        }
                     >
                         <span>Войти через</span>
-                        {authVKQuery.isFetching ? (
+                        <IconBrandVk strokeWidth="1.5" />
+                        {authVKQuery.isFetching && (
                             <IconLoader3
                                 strokeWidth="1.5"
                                 className="animate-spin"
                             />
-                        ) : (
-                            <IconBrandVk strokeWidth="1.5" />
                         )}
                     </Button>
                     <Button
-                        onClick={() =>
-                            authYandexQuery
-                                .refetch()
-                                .then(() => {
-                                    if (authYandexQuery.data) {
-                                        onSuccess(authYandexQuery.data);
-                                    }
-                                })
-                                .catch((err) => onError(err))
-                        }
+                        onClick={() => authYandexQuery.refetch()}
                         className="flex gap-1 w-full"
-                        disabled={authYandexQuery.isFetching}
+                        disabled={
+                            authVKQuery.isFetching || authYandexQuery.isFetching
+                        }
                     >
                         <span>Войти через</span>
-                        {authYandexQuery.isFetching ? (
+                        <IconBrandYandex strokeWidth="1.5" />
+                        {authYandexQuery.isFetching && (
                             <IconLoader3
                                 strokeWidth="1.5"
                                 className="animate-spin"
                             />
-                        ) : (
-                            <IconBrandYandex strokeWidth="1.5" />
                         )}
                     </Button>
                 </CardContent>
