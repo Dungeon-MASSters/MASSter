@@ -25,8 +25,16 @@ import { useUser } from "@/lib/use-user";
 import { useState } from "react";
 import { IconBug, IconLoader3 } from "@tabler/icons-react";
 import { useLocation } from "wouter";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
 
-const ACCEPTED_IMAGE_TYPES = ["video/mp4"];
+const ACCEPTED_VIDEO_TYPES = ["video/mp4"];
+const ACCEPTED_IMAGE_TYPES = ["image/png", "image/jpg"];
 
 export function AddSimplePromptCard() {
     const [_, navigate] = useLocation();
@@ -42,7 +50,7 @@ export function AddSimplePromptCard() {
                 message: "Нужно загрузить видеоролик"
             })
             .refine(
-                (files) => ACCEPTED_IMAGE_TYPES.includes(files.type),
+                (files) => ACCEPTED_VIDEO_TYPES.includes(files.type),
                 "Пока мы поддерживаем только .mp4 видеоролики :("
             )
     });
@@ -104,7 +112,6 @@ export function AddSimplePromptCard() {
                                             <FormControl>
                                                 <Input
                                                     type="file"
-                                                    placeholder="shadcn"
                                                     accept="video/mp4"
                                                     onBlur={field.onBlur}
                                                     onChange={(e) =>
@@ -133,7 +140,75 @@ export function AddSimplePromptCard() {
     );
 }
 
+const STYLES = ["Киберпанк", "Фэнтези", "Ретро", "Вестерн"];
+
 export function AddAdvancedPromptCard() {
+    const [_, navigate] = useLocation();
+
+    const [isSubmited, setIsSubmited] = useState(false);
+    const [isError, setIsError] = useState(false);
+
+    const user = useUser(false);
+
+    const FormSchema = z.object({
+        prompt: z.string().min(3).max(500), // TODO: limits?
+        negativePrompt: z.string().max(500).optional(),
+        style: z.string(),
+        inputImage: z
+            .custom<FileList>((v) => v instanceof FileList, {
+                message: "Нужно загрузить картинки для референса"
+            })
+            .refine((files) => {
+                for (let i = 0; i < files.length; i++) {
+                    if (!ACCEPTED_IMAGE_TYPES.includes(files[i].type)) {
+                        return false;
+                    }
+                }
+                return true;
+            }, "Пока мы поддерживаем только .png и .jpg изображения")
+            .optional(),
+        video: z
+            .custom<File>((v) => v instanceof File, {
+                message: "Нужно загрузить видеоролик"
+            })
+            .refine(
+                (files) => ACCEPTED_VIDEO_TYPES.includes(files.type),
+                "Пока мы поддерживаем только .mp4 видеоролики :("
+            ),
+        numImages: z.coerce.number().min(1).max(10)
+    });
+
+    const form = useForm<z.infer<typeof FormSchema>>({
+        resolver: zodResolver(FormSchema)
+    });
+    const onSubmit: SubmitHandler<z.infer<typeof FormSchema>> = (data) => {
+        console.log("submit", data);
+        const formData = new FormData();
+        formData.append("created_by", user.data?.record.id ?? "");
+        formData.append("prompt", data.prompt);
+        if (data.negativePrompt) {
+            formData.append("negative_prompt", data.negativePrompt);
+        }
+        formData.append("style", data.style);
+        for (let file in data.inputImage) {
+            formData.append("input_image", file);
+        }
+        formData.append("video", data.video);
+        formData.append("status", "open");
+        formData.append("num_images", `${data.numImages}`);
+        pb.collection("text_generation_mvp")
+            .create(formData)
+            .then(() => {
+                navigate("/grid");
+            })
+            .catch((err) => {
+                console.error(err);
+                setIsError(true);
+                setIsSubmited(false);
+            });
+        setIsSubmited(true);
+    };
+
     return (
         <Card>
             <CardHeader>
@@ -144,7 +219,183 @@ export function AddAdvancedPromptCard() {
                 </CardDescription>
             </CardHeader>
 
-            <CardContent className="gap-2 flex-col flex"></CardContent>
+            <CardContent className="gap-2 flex-col flex">
+                {isSubmited ? (
+                    <IconLoader3 className="text-primary animate-spin mx-auto" />
+                ) : (
+                    <>
+                        {isError && (
+                            <div className="flex gap-1 text-red-500">
+                                <IconBug />
+                                <span>не получилось запустить генерацию</span>
+                            </div>
+                        )}
+                        <Form {...form}>
+                            <form
+                                onSubmit={form.handleSubmit(onSubmit)}
+                                className="flex flex-col gap-2"
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name="prompt"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>
+                                                Промт (TODO: описание)
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    placeholder="Промт"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Что должно быть на обложке
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="negativePrompt"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Промт</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    placeholder="Негативный промт"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Чего НЕ ДОЛЖНО быть на обложке*
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="style"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Стиль</FormLabel>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                defaultValue={field.value}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Выбрать стиль" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {STYLES.map((style) => (
+                                                        <SelectItem
+                                                            value={style}
+                                                        >
+                                                            {style}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormDescription>
+                                                Стиль для генерации обложки
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="numImages"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>
+                                                Количество вариантов
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    placeholder="Количество"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Сколько вариантов оформления
+                                                сгенерировать
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="inputImage"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Референсы</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="file"
+                                                    multiple={true}
+                                                    onBlur={field.onBlur}
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.files
+                                                        )
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Изображения похожие на желаемый
+                                                результат
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="video"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Видеоролик</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="file"
+                                                    placeholder="shadcn"
+                                                    accept="video/mp4"
+                                                    onBlur={field.onBlur}
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.files?.[0]
+                                                        )
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Видеоролик, на основе которого
+                                                будет сгенирована обложка
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <Button type="submit">Сгенерировать</Button>
+                            </form>
+                        </Form>
+                    </>
+                )}
+            </CardContent>
         </Card>
     );
 }
