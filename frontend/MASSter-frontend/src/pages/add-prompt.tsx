@@ -32,113 +32,12 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
+import { VideoCoverSimplePromptForm } from "@/components/video-cover-prompt";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 const ACCEPTED_VIDEO_TYPES = ["video/mp4"];
 const ACCEPTED_IMAGE_TYPES = ["image/png", "image/jpg"];
-
-export function AddSimplePromptCard() {
-    const [_, navigate] = useLocation();
-
-    const [isSubmited, setIsSubmited] = useState(false);
-    const [isError, setIsError] = useState(false);
-
-    const user = useUser(false);
-
-    const FormSchema = z.object({
-        video: z
-            .custom<File>((v) => v instanceof File, {
-                message: "Нужно загрузить видеоролик"
-            })
-            .refine(
-                (files) => ACCEPTED_VIDEO_TYPES.includes(files.type),
-                "Пока мы поддерживаем только .mp4 видеоролики :("
-            )
-    });
-
-    const form = useForm<z.infer<typeof FormSchema>>({
-        resolver: zodResolver(FormSchema)
-    });
-    const onSubmit: SubmitHandler<z.infer<typeof FormSchema>> = (data) => {
-        console.log("submit", data);
-        const formData = new FormData();
-        formData.append("video", data.video);
-        formData.append("created_by", user.data?.record.id ?? "");
-        formData.append("num_images", "3");
-        formData.append("status", "open");
-        pb.collection("text_generation_mvp")
-            .create(formData)
-            .then(() => {
-                navigate("/grid");
-            })
-            .catch((err) => {
-                console.error(err);
-                setIsError(true);
-                setIsSubmited(false);
-            });
-        setIsSubmited(true);
-    };
-
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Простая генерация</CardTitle>
-                <CardDescription>
-                    Генерация только на основе видеоролика
-                </CardDescription>
-            </CardHeader>
-
-            <CardContent className="gap-2 flex-col flex">
-                {isSubmited ? (
-                    <IconLoader3 className="text-primary animate-spin mx-auto" />
-                ) : (
-                    <>
-                        {isError && (
-                            <div className="flex gap-1 text-red-500">
-                                <IconBug />
-                                <span>не получилось запустить генерацию</span>
-                            </div>
-                        )}
-                        <Form {...form}>
-                            <form
-                                onSubmit={form.handleSubmit(onSubmit)}
-                                className="flex flex-col gap-2"
-                            >
-                                <FormField
-                                    control={form.control}
-                                    name="video"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Видеоролик</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="file"
-                                                    accept="video/mp4"
-                                                    onBlur={field.onBlur}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target.files?.[0]
-                                                        )
-                                                    }
-                                                />
-                                            </FormControl>
-                                            <FormDescription>
-                                                Видеоролик, на основе которого
-                                                будет сгенирована обложка
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <Button type="submit">Сгенерировать</Button>
-                            </form>
-                        </Form>
-                    </>
-                )}
-            </CardContent>
-        </Card>
-    );
-}
 
 const STYLES = ["Киберпанк", "Фэнтези", "Ретро", "Вестерн"];
 
@@ -404,18 +303,62 @@ export function AddAdvancedPromptCard() {
 }
 
 export function AddPromptPage() {
+    const { data: user, isLoading } = useUser(false);
+    const [advancedMode, setAdvancedMode] = useState(false);
+
+    if (isLoading || user === undefined) {
+        return <IconLoader3 className="text-primary animate-spin mx-auto" />;
+    }
+
     return (
-        <div className="py-4 w-full flex justify-center">
-            <Tabs defaultValue="simple" className="w-[600px]">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="simple">Простой</TabsTrigger>
-                    <TabsTrigger value="advanced">Продвинутый</TabsTrigger>
+        <div className="py-4 w-fit mx-auto flex flex-col gap-4">
+            <h1 className="font-bold text-xl">
+                Создать дизайн при помощи нейросети!
+            </h1>
+
+            <div className="flex items-center space-x-2">
+                <Switch
+                    id="enable-advanced"
+                    checked={advancedMode}
+                    onCheckedChange={setAdvancedMode}
+                />
+                <Label htmlFor="enable-advanced">
+                    {advancedMode ? "Продвинутый режим" : "Прстой режим"}
+                </Label>
+            </div>
+
+            <Tabs defaultValue="video-cover" className="w-[600px]">
+                <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="video-cover">Обложка видео</TabsTrigger>
+                    <TabsTrigger value="banner">Баннер канала</TabsTrigger>
+                    <TabsTrigger value="avatar">Автарка канала</TabsTrigger>
                 </TabsList>
-                <TabsContent value="simple">
-                    <AddSimplePromptCard />
+                <TabsContent value="video-cover">
+                    {advancedMode ? undefined : (
+                        <VideoCoverSimplePromptForm
+                            user={user}
+                            onSuccess={() => {}}
+                            onError={() => {}}
+                        />
+                    )}
                 </TabsContent>
-                <TabsContent value="advanced">
-                    <AddAdvancedPromptCard />
+                <TabsContent value="banner">
+                    {advancedMode ? undefined : (
+                        <VideoCoverSimplePromptForm
+                            user={user}
+                            onSuccess={() => {}}
+                            onError={() => {}}
+                        />
+                    )}
+                </TabsContent>
+                <TabsContent value="avatar">
+                    {advancedMode ? undefined : (
+                        <VideoCoverSimplePromptForm
+                            user={user}
+                            onSuccess={() => {}}
+                            onError={() => {}}
+                        />
+                    )}
                 </TabsContent>
             </Tabs>
         </div>

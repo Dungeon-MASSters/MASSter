@@ -17,11 +17,13 @@ import {
 } from "./components/ui/navigation-menu";
 import {
     IconBrush,
+    IconFrame,
     IconLogout,
     IconPhoto,
     IconUser
 } from "@tabler/icons-react";
 import clsx from "clsx";
+import { EditorPage } from "./pages/editor";
 
 function App() {
     const {
@@ -75,6 +77,16 @@ function App() {
                             </NavigationMenuLink>
                         </Link>
                     </NavigationMenuItem>
+                    <NavigationMenuItem
+                        className={clsx(navigationMenuTriggerStyle())}
+                    >
+                        <Link href="/editor">
+                            <NavigationMenuLink className="flex gap-1">
+                                <IconFrame />
+                                <span>редактор</span>
+                            </NavigationMenuLink>
+                        </Link>
+                    </NavigationMenuItem>
                     <NavigationMenuItem>
                         <NavigationMenuTrigger className="flex gap-1">
                             <IconUser />
@@ -108,6 +120,10 @@ function App() {
                 <Route path="/grid" component={GridPage} />
                 <Route path="/generate">
                     <AddPromptPage />
+                </Route>
+
+                <Route path="/editor">
+                    <EditorPage />
                 </Route>
                 <Route>
                     <Redirect to="/" />
