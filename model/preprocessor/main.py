@@ -1,10 +1,14 @@
+import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 from pocketbase import PocketBase  # Client also works the same
 from pocketbase.client import FileUpload
 import time
 import re
 import pathlib
 from libs import logger
-from libs.models import Translator
+from libs.models import Translator, VideoParser
+import urllib.request
 
 class Pipeline:
     def __init__(self) -> None:
@@ -13,7 +17,8 @@ class Pipeline:
             "dev@email.local", 
             "6c6297287af76472")
         
-        self.translator = Translator()
+        #self.translator = Translator()
+        self.vparser = VideoParser()
 
     def run(self):
         while True:
@@ -46,7 +51,20 @@ class Pipeline:
                     style = corr[records.items[0].style]
                 except:
                     style = records.items[0].style
+
+                video_url = self.pb.collection('text_generation_mvp').get_file_url(records.items[0], filename=records.items[0].video)
                 
+                video_name = 'video.mp4'
+                urllib.request.urlretrieve(video_url, video_name)
+                
+                summary = self.vparser.get_desc_from_video(video_name)[0]['summary_text']
+                print(summary)
+
+                if prompt != '':
+                    prompt = summary + ', ' + prompt
+                else:
+                    prompt = summary
+
                 self.pb.collection('text_generation_mvp').update(
                     id=records.items[0].id,
                     body_params={
@@ -56,7 +74,9 @@ class Pipeline:
                         "style": style
                     }
                 )
+
             except:
+                raise
                 logger.error('Ошибка при чтении коллекции')
                 time.sleep(3)
 
