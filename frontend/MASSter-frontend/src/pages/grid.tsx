@@ -48,14 +48,21 @@ function GridCard({item}: {item: RecordModel}) {
         }
     );
 
+    let coverMsg = undefined;
+    if (item.status != "generated") {
+        coverMsg = <div className="rounded-lg absolute h-full w-full bg-black
+        bg-opacity-30 flex items-center justify-center text-white">Обработка</div>
+    }
+
     let elem = <IconLoader3 className="animate-spin"></IconLoader3>;
-    if (fileQuery.isSuccess) {
+    if (fileQuery.isSuccess && item.status == "generated") {
         elem = <img className="rounded-lg h-52 w-full object-cover"
             src={fileQuery.data.length == 0 ? imgPlaceholder : fileQuery.data}></img>
     };
 
     return (
         <Card className="w-full relative">
+            {coverMsg}
             <CardContent className="p-0">{elem}</CardContent>
             <CardFooter className="rounded-lg flex w-full justify-between
                 absolute bottom-0 bg-gradient-to-b from-transparent to-black pt-8">
