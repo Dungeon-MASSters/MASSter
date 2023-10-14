@@ -5,10 +5,11 @@ import pathlib
 from PIL import Image
 from libs import logger
 from libs.models import ImageGenerationModel
+import torch
 
 class Pipeline:
     def __init__(self) -> None:
-        self.pb: PocketBase = PocketBase("https://pb.apps.npcode.xyz")
+        self.pb: PocketBase = PocketBase("https://pb.apps.npod.space/")
         self.admin_data = self.pb.admins.auth_with_password(
             "dev@email.local", 
             "6c6297287af76472")
@@ -83,6 +84,8 @@ class Pipeline:
 
     def process_generation(self, data) -> list[Image.Image]:
         # self.pb.get_file_url(data, filename=f'tmp/{data.record.image}')
+
+        torch.cuda.empty_cache()
 
         images = self.model.generate(
             num_steps=200,

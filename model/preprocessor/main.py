@@ -8,7 +8,7 @@ from libs.models import Translator
 
 class Pipeline:
     def __init__(self) -> None:
-        self.pb: PocketBase = PocketBase("https://pb.apps.npcode.xyz")
+        self.pb: PocketBase = PocketBase("https://pb.apps.npod.space/")
         self.admin_data = self.pb.admins.auth_with_password(
             "dev@email.local", 
             "6c6297287af76472")
@@ -29,18 +29,31 @@ class Pipeline:
 
                 if len(records.items) == 0:
                     logger.info(f'Не найдено ожидающих запросов')
-                    time.sleep(10)
+                    time.sleep(3)
                     continue
 
                 prompt, negative_prompt = self.preprocess(
                     records.items[0].prompt, records.items[0].negative_prompt)
+                
+                corr = {
+                    'Вестерн': 'Western',
+                    'Ретро': 'Retro',
+                    'Фэнтези': 'Fantasy',
+                    'Киберпанк': 'Cyberpunk'
+                }
+
+                try:
+                    style = corr[records.items[0].style]
+                except:
+                    style = records.items[0].style
                 
                 self.pb.collection('text_generation_mvp').update(
                     id=records.items[0].id,
                     body_params={
                         "status": "preprocessed",
                         "prompt": prompt,
-                        "negative_prompt": negative_prompt
+                        "negative_prompt": negative_prompt,
+                        "style": style
                     }
                 )
             except:

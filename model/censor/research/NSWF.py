@@ -8,7 +8,6 @@ def check_nudity_one(image_path):
         return False
     return True
 
-
 def check_nudity_lot(image_paths):
     result = []
     for image_path in image_paths:
