@@ -50,6 +50,7 @@ export function GridPage() {
                 </Tabs>
             </div>
             <ImageGrid imgType={imgType}></ImageGrid>
+            <Button></Button>
         </div>
     );
 }
@@ -109,10 +110,19 @@ function ImageGrid({ imgType }: { imgType: ImgType }) {
                 </Dialog>
             );
         } else {
-            grid = <div>No items!</div>;
+            grid = <div className="text-gray-600 text-lg">
+                <p>
+                    <span className="inline-block mb-2 font-semibold">Нет изображений в данной категории!</span><br/>
+                    Вот, что с этим можно сделать:
+                </p>
+                <ul>
+                    <li>• Нажмите кнопку в правом нижнем углу страницы, чтобы сгенерировать изображение...</li>
+                    <li>• ... или же выберите нужный раздел вверху!</li>
+                </ul>
+            </div>;
         }
     } else {
-        grid = <div>Error</div>;
+        grid = <div className="text-gray-600 text-lg">Произошла какая-то ошибка. Мы уже над ней работаем!</div>;
     }
 
     return grid;
@@ -203,7 +213,7 @@ function ModalResultWindow({ item, canEdit, openChange }: ModalResWindowProps) {
                                 setCurrentFileIndex(currentFileIndex - 1);
                             }}
                         >
-                            Previous
+                            Пред.
                         </Button>
                         <Button
                             disabled={currentFileIndex == item.num_images - 1}
@@ -211,7 +221,7 @@ function ModalResultWindow({ item, canEdit, openChange }: ModalResWindowProps) {
                                 setCurrentFileIndex(currentFileIndex + 1);
                             }}
                         >
-                            Next
+                            След.
                         </Button>
                     </div>
                 </div>
