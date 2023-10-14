@@ -27,20 +27,38 @@ services:
 
   preprocessor:
     build:
-      context: model/preprocessor/docker
+      context: model/generator/
+      dockerfile: docker/Dockerfile
 
     environment:
       - PB_LINK=http://pocketbase:8090/
       - PB_LOGIN=dev@email.local
       - PB_PWD=1234567890
       - COL_NAME=text_generation_mvp
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   generator:
     build:
-      context: model/generator/docker
+      context: model/generator/
+      dockerfile: docker/Dockerfile
 
     environment:
       - PB_LINK=http://pocketbase:8090/
       - PB_LOGIN=dev@email.local
       - PB_PWD=1234567890
       - COL_NAME=text_generation_mvp
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

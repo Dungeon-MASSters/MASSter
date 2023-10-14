@@ -1,4 +1,5 @@
 import {
+    ACCEPTED_IMAGE_TYPES,
     ACCEPTED_VIDEO_TYPES,
     STYLES
 } from "@/lib/consts";
@@ -169,24 +170,24 @@ export function AvatarAdvancedPromptForm({
         prompt: z.string().min(3).max(500),
         negativePrompt: z.string().max(500).optional(),
         style: z.string().default("Нет"),
-        // inputImage: z
-        //     .custom<File>((v) => v instanceof File, {
-        //         message: "Нужно загрузить картинки для референса"
-        //     })
-        //     .refine(
-        //         (v) => ACCEPTED_IMAGE_TYPES.includes(v.type),
-        //         "Пока мы поддерживаем только .png и .jpg изображения"
-        //     )
-        //     .optional(),
-        // video: z
-        //     .custom<File>((v) => v instanceof File, {
-        //         message: "Нужно загрузить видеоролик"
-        //     })
-        //     .refine(
-        //         (v) => ACCEPTED_VIDEO_TYPES.includes(v.type),
-        //         "Пока мы поддерживаем только .mp4 видеоролики :("
-        //     )
-        //     .optional(),
+        inputImage: z
+            .custom<File>((v) => v instanceof File, {
+                message: "Нужно загрузить картинки для референса"
+            })
+            .refine(
+                (v) => ACCEPTED_IMAGE_TYPES.includes(v.type),
+                "Пока мы поддерживаем только .png и .jpg изображения"
+            )
+            .optional(),
+        video: z
+            .custom<File>((v) => v instanceof File, {
+                message: "Нужно загрузить видеоролик"
+            })
+            .refine(
+                (v) => ACCEPTED_VIDEO_TYPES.includes(v.type),
+                "Пока мы поддерживаем только .mp4 видеоролики :("
+            )
+            .optional(),
         numImages: z.coerce.number().min(1).max(7)
     });
 
@@ -207,12 +208,12 @@ export function AvatarAdvancedPromptForm({
         formData.append("type", "avatar");
         formData.append("num_images", `${data.numImages}`);
 
-        // if (data.inputImage) {
-        //     formData.append("input_image", data.inputImage);
-        // }
-        // if (data.video) {
-        //     formData.append("video", data.video);
-        // }
+        if (data.inputImage) {
+            formData.append("input_image", data.inputImage);
+        }
+        if (data.video) {
+            formData.append("video", data.video);
+        }
         return formData;
     };
 
@@ -326,6 +327,59 @@ export function AvatarAdvancedPromptForm({
                                             </Select>
                                             <FormDescription>
                                                 Стиль для генерации аватарки
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="inputImage"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Референс</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="file"
+                                                    multiple={true}
+                                                    onBlur={field.onBlur}
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.files?.[0]
+                                                        )
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Изображение похожее на желаемый
+                                                результат
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="video"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Видеоролик</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="file"
+                                                    accept="video/mp4"
+                                                    onBlur={field.onBlur}
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.files?.[0]
+                                                        )
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Видеоролик, на основе которого
+                                                будет сгенирована аватарка
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
