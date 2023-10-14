@@ -70,6 +70,7 @@ class Pipeline:
                 for index, image in enumerate(images):
                     path = f'tmp/{index}.png'
                     paths.append(path)
+                    image.resize(size=(width, height))
                     image.save(path)
                     uploads.append((path, open(path, mode='rb')))
 

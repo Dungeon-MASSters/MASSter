@@ -1,7 +1,10 @@
 from diffusers import KandinskyV22Pipeline, KandinskyV22PriorPipeline, KandinskyV22ControlnetPipeline
 import torch
 from PIL import Image
+from transformers import pipeline
 from typing import Callable
+from diffusers.utils import load_image
+import numpy as np
 from transformers import CLIPVisionModelWithProjection
 from diffusers.models import UNet2DConditionModel
 import gc
@@ -46,18 +49,38 @@ class ImageGenerationModel:
             torch_dtype=torch.float16
         ).to(self.DEVICE)
 
-    # @free_cache
-    # def load_depth_model(self):
-    #     self.pipe = KandinskyV22ControlnetPipeline.from_pretrained(
-    #         "kandinsky-community/kandinsky-2-2-controlnet-depth", torch_dtype=torch.float16
-    #     ).to(self.DEVICE)
-
-    # @free_cache
-    # def remove_depth_model(self):
-    #     del self.pipe
+    @free_cache
+    def remove_models(self):
+        try:
+            del self.image_encoder
+            del self.unet
+            del self.prior
+            del self.decoder
+        except:
+            try:
+                del self.pipe
+            except:
+                ...
 
     @free_cache
-    def generate(self, 
+    def load_depth_model(self):
+        self.pipe_prior = KandinskyV22PriorPipeline.from_pretrained(
+            "kandinsky-community/kandinsky-2-2-prior", torch_dtype=torch.float16
+        ).to(self.DEVICE)
+
+        self.pipe = KandinskyV22ControlnetPipeline.from_pretrained(
+            "kandinsky-community/kandinsky-2-2-controlnet-depth", torch_dtype=torch.float16
+        ).to(self.DEVICE)
+
+        self.depth_estimator = pipeline("depth-estimation")
+
+    @free_cache
+    def remove_depth_model(self):
+        del self.pipe
+
+    @free_cache
+    def generate(
+        self, 
         num_steps: int, 
         guidance_scale: float, 
         height: int, 
@@ -113,3 +136,53 @@ class ImageGenerationModel:
             return []
 
         return images.images
+
+    def generate_based_on_image(
+        self,
+        image_path: str,
+        num_steps: int, 
+        guidance_scale: float, 
+        height: int, 
+        width: int,
+        prompt: str,
+        style: str,
+        negative_prompt: str,
+        num_images: int
+        ) -> list[Image.Image]:
+
+        try:
+            reference_image = Image.open(image_path, mode='r')
+            hint = self.make_hint(reference_image, self.depth_estimator).unsqueeze(0).half().to("cuda")
+        
+            generator = torch.Generator(device="cuda").manual_seed(43)
+            image_emb, zero_image_emb = self.pipe_prior(
+                prompt=prompt,
+                negative_prompt=negative_prompt,
+                num_images_per_prompt=num_images,
+                generator=generator
+            ).to_tuple()
+
+            images = self.pipe(
+                image_embeds=image_emb,
+                negative_image_embeds=zero_image_emb,
+                hint=hint,
+                num_inference_steps=num_steps,
+                generator=generator,
+                height=height,
+                width=width,
+            ).images
+        except:
+            raise
+            return []
+
+        return images
+
+
+    def make_hint(self, image, depth_estimator):
+        image = depth_estimator(image)["depth"]
+        image = np.array(image)
+        image = image[:, :, None]
+        image = np.concatenate([image, image, image], axis=2)
+        detected_map = torch.from_numpy(image).float() / 255.0
+        hint = detected_map.permute(2, 0, 1)
+        return hint
