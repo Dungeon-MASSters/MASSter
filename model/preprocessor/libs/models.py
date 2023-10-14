@@ -14,6 +14,7 @@ from PIL import Image
 from transformers import BlipProcessor, BlipForConditionalGeneration, pipeline
 import torch
 import shutil
+from libs import logger
 
 class Translator:
     def __init__(self) -> None:
