@@ -9,7 +9,7 @@ export function EditedCoversPage() {
 
     return (
         <div>
-            <h1 className="text-xl font-bold">Созданные обложки</h1>
+            <h1 className="text-xl font-bold">Отредактированные изображения</h1>
             {isLoading ? (
                 <div className="flex gap-1 text-primary">
                     <IconLoader3 className="animate-spin" />
@@ -25,7 +25,10 @@ export function EditedCoversPage() {
                     ))}
                 </div>
             ) : (
-                <div>Вы ещё не сохранили ни одной обложки :(</div>
+                <div>
+                    Тут можно будет найти изображения, которые вы создадите и
+                    сохраните при помощи нашей нейросети
+                </div>
             )}
         </div>
     );

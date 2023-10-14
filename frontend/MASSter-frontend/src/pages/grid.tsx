@@ -78,7 +78,7 @@ function ImageGrid({ imgType }: { imgType: ImgType }) {
 
     if (listQuery.data) {
         if (listQuery.data.length != 0) {
-            const canEdit = imgType == ImgType.video;
+            // const canEdit = imgType == ImgType.video;
             const gridItems = [];
             for (const item of listQuery.data ?? []) {
                 gridItems.push(
@@ -102,7 +102,7 @@ function ImageGrid({ imgType }: { imgType: ImgType }) {
                     <DialogContent className="w-3/4 h-3/4">
                         <ModalResultWindow
                             item={currentItem ?? listQuery.data[0]}
-                            canEdit={canEdit}
+                            canEdit={true}
                             openChange={setOpen}
                         ></ModalResultWindow>
                     </DialogContent>
