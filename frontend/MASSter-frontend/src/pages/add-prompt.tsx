@@ -174,7 +174,8 @@ export function AddAdvancedPromptCard() {
             .refine(
                 (files) => ACCEPTED_VIDEO_TYPES.includes(files.type),
                 "Пока мы поддерживаем только .mp4 видеоролики :("
-            ),
+            )
+            .optional(),
         numImages: z.coerce.number().min(1).max(10)
     });
 
@@ -193,7 +194,9 @@ export function AddAdvancedPromptCard() {
         for (let file in data.inputImage) {
             formData.append("input_image", file);
         }
-        formData.append("video", data.video);
+        if (data.video) {
+            formData.append("video", data.video);
+        }
         formData.append("status", "open");
         formData.append("num_images", `${data.numImages}`);
         pb.collection("text_generation_mvp")
