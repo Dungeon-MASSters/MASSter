@@ -1,5 +1,4 @@
 import {
-    ACCEPTED_IMAGE_TYPES,
     ACCEPTED_VIDEO_TYPES,
     STYLES
 } from "@/lib/consts";
