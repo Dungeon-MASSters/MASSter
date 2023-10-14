@@ -9,7 +9,9 @@ export function EditedCoversPage() {
 
     return (
         <div>
-            <h1 className="text-xl font-bold">Отредактированные изображения</h1>
+            <h1 className="text-xl font-bold mb-4">
+                Отредактированные изображения
+            </h1>
             {isLoading ? (
                 <div className="flex gap-1 text-primary">
                     <IconLoader3 className="animate-spin" />
