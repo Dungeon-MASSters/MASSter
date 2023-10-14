@@ -75,9 +75,7 @@ function App() {
                             </NavigationMenuLink>
                         </Link>
                     </NavigationMenuItem>
-                    <NavigationMenuItem
-                        className={clsx(navigationMenuTriggerStyle(), "flex")}
-                    >
+                    <NavigationMenuItem>
                         <NavigationMenuTrigger className="flex gap-1">
                             <IconUser />
                             <span>{user.record["username"]}</span>
