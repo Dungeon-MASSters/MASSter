@@ -167,27 +167,49 @@ class ImageGenerationModel:
         if width < 1: width = 720
         if guidance_scale < 0: guidance_scale = 4.0
 
-
         try:
-            reference_image = Image.open(image_path, mode='r')
-            hint = self.make_hint(reference_image, self.depth_estimator).unsqueeze(0).half().to("cuda")
-        
+            reference_image = load_image(image_path).resize((768, 768))
+
+            def make_hint(image, depth_estimator):
+                image = depth_estimator(image)["depth"]
+                image = np.array(image)
+                image = image[:, :, None]
+                image = np.concatenate([image, image, image], axis=2)
+                detected_map = torch.from_numpy(image).float() / 255.0
+                hint = detected_map.permute(2, 0, 1)
+                return hint
+
+
+            depth_estimator = pipeline("depth-estimation")
+            hint = make_hint(reference_image, depth_estimator).unsqueeze(0).half().to("cuda")
+
+            pipe_prior = KandinskyV22PriorPipeline.from_pretrained(
+                "kandinsky-community/kandinsky-2-2-prior", torch_dtype=torch.float16
+            )
+            pipe_prior = pipe_prior.to("cuda")
+
+            pipe = KandinskyV22ControlnetPipeline.from_pretrained(
+                "kandinsky-community/kandinsky-2-2-controlnet-depth", torch_dtype=torch.float16
+            )
+            pipe = pipe.to("cuda")
+
+            negative_prior_prompt = "lowres, text, error, cropped, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated"
+
             generator = torch.Generator(device="cuda").manual_seed(43)
-            image_emb, zero_image_emb = self.pipe_prior(
-                prompt=prompt,
-                negative_prompt=negative_prompt,
-                num_images_per_prompt=num_images,
-                generator=generator
+            image_emb, zero_image_emb = pipe_prior(
+                prompt=prompt + ', 4k', negative_prompt=negative_prior_prompt, generator=generator, num_inference_steps=200
             ).to_tuple()
 
-            images = self.pipe(
+            width, height = reference_image.size
+
+            images = pipe(
                 image_embeds=image_emb,
                 negative_image_embeds=zero_image_emb,
                 hint=hint,
-                num_inference_steps=num_steps,
+                num_inference_steps=200,
                 generator=generator,
                 height=height,
-                width=width,
+                width=width
             ).images
         except:
             raise

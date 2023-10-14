@@ -2,5 +2,6 @@ __pycache__/
 tmp/
 
 *.bin
+*.jpg
 *.mp4
 nohup.out
