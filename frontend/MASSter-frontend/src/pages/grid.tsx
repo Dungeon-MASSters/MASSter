@@ -35,7 +35,7 @@ export function GridPage() {
                     <DialogTrigger
                         key={item.id}
                         disabled={item.status != "generated"}
-                        onClick={(e) => {
+                        onClick={(_) => {
                             setCurrentItem(item);
                             setOpen(true);
                         }}>
