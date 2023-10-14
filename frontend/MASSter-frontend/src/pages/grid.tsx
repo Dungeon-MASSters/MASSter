@@ -1,5 +1,11 @@
 import { FullscreenLoader } from "@/components/loaders";
-import { Card, CardTitle, CardFooter, CardDescription, CardContent } from "@/components/ui/card";
+import {
+    Card,
+    CardTitle,
+    CardFooter,
+    CardDescription,
+    CardContent
+} from "@/components/ui/card";
 import { pb } from "@/lib/pb-client";
 import { RecordModel } from "pocketbase";
 import { useQuery } from "react-query";
@@ -24,11 +30,15 @@ export function GridPage() {
         return <FullscreenLoader />;
     }
 
-    if (listQuery.data) {
-        if (listQuery.data.items.length != 0) {
-            const gridItems = [];
-            for (const item of listQuery.data?.items ?? []) {
-                gridItems.push(
+    if (listQuery.data?.items.length === 0) {
+        return <div className="text-center">Пока тут очень пусто...</div>;
+    }
+
+    return (
+        <div>
+            <h1 className="text-xl font-bold">Мой дизайн</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {listQuery.data?.items.map((item) => (
                     <Dialog key={item.id}>
                         <DialogTrigger disabled={item.status != "generated"}>
                             <GridCard item={item}></GridCard>
@@ -37,51 +47,48 @@ export function GridPage() {
                             <ModalResultWindow item={item}></ModalResultWindow>
                         </DialogContent>
                     </Dialog>
-                )
-            }
-            return <div className="grid grid-cols-4 gap-2">{gridItems}</div>;
-        } else {
-            return <div>No items!</div>
-        }
-    } else {
-        return <div>Error</div>
-    }
+                ))}
+            </div>
+        </div>
+    );
 }
 
-function GridCard({item}: {item: RecordModel}) {
-    const fileQuery = useQuery(
-        [`get-file-${item.id}`],
-        () => {
-            return pb.files.getUrl(item, item.output_image[0]);
-        }
-    );
-
-    let coverMsg = undefined;
-    if (item.status != "generated") {
-        coverMsg = <div className="rounded-lg absolute h-full w-full bg-black
-        bg-opacity-30 flex items-center justify-center text-white">Обработка</div>
-    }
-
-    let elem = <IconLoader3 className="animate-spin"></IconLoader3>;
-    if (fileQuery.isSuccess && item.status == "generated") {
-        elem = <img className="rounded-lg h-full w-full object-cover"
-            src={fileQuery.data.length == 0 ? imgPlaceholder : fileQuery.data}></img>
-    };
+function GridCard({ item }: { item: RecordModel }) {
+    const fileQuery = useQuery([`get-file-${item.id}`], () => {
+        return pb.files.getUrl(item, item.output_image[0]);
+    });
 
     return (
         <Card className="w-full relative h-52">
-            {coverMsg}
-            <CardContent className="p-0 h-full">{elem}</CardContent>
-            <CardFooter className="rounded-lg flex w-full justify-between
-                absolute bottom-0 bg-gradient-to-b from-transparent to-black pt-8">
+            {item.status != "generated" && (
+                <div className="rounded-lg absolute h-full w-full bg-black bg-opacity-30 flex items-center justify-center text-white">
+                    Обработка
+                </div>
+            )}
+
+            <CardContent className="p-0 h-full">
+                {fileQuery.isSuccess && item.status == "generated" && (
+                    <img
+                        className="rounded-lg h-full w-full object-cover"
+                        src={
+                            fileQuery.data.length == 0
+                                ? imgPlaceholder
+                                : fileQuery.data
+                        }
+                    ></img>
+                )}
+            </CardContent>
+            <CardFooter className="rounded-lg flex w-full justify-between absolute bottom-0 bg-gradient-to-b from-transparent to-black pt-8">
                 <CardTitle className="text-white">Image</CardTitle>
-                <CardDescription className="text-gray-300">{item.created}</CardDescription>
+                <CardDescription className="text-gray-300">
+                    {item.created}
+                </CardDescription>
             </CardFooter>
         </Card>
     );
 }
 
-function ModalResultWindow({item}: {item: RecordModel}) {
+function ModalResultWindow({ item }: { item: RecordModel }) {
     const [currentFileIndex, setCurrentFileIndex] = useState(0);
 
     const fileQuery = useQuery(
@@ -91,24 +98,33 @@ function ModalResultWindow({item}: {item: RecordModel}) {
         }
     );
 
-    let elem = <IconLoader3 className="animate-spin"></IconLoader3>;
-    if (fileQuery.isSuccess && fileQuery.data.length != 0) {
-        elem =  <img className="h-full w-full object-contain"
-            src={fileQuery.data}></img>
-    };
-
     return (
         <Card className="w-full">
-            <CardContent className="h-full">{elem}</CardContent>
+            <CardContent className="h-full flex items-center justify-center">
+                {fileQuery.isSuccess && fileQuery.data.length != 0 ? (
+                    <img
+                        className="h-full w-full object-contain"
+                        src={fileQuery.data}
+                    ></img>
+                ) : (
+                    <IconLoader3 className="animate-spin"></IconLoader3>
+                )}
+            </CardContent>
             <CardFooter>
                 <Button
                     disabled={currentFileIndex == 0}
-                    onClick={() => { setCurrentFileIndex(currentFileIndex - 1) }}>
+                    onClick={() => {
+                        setCurrentFileIndex(currentFileIndex - 1);
+                    }}
+                >
                     Previous
                 </Button>
                 <Button
-                    disabled={currentFileIndex == item.num_images - 1 }
-                    onClick={() => { setCurrentFileIndex(currentFileIndex + 1) }}>
+                    disabled={currentFileIndex == item.num_images - 1}
+                    onClick={() => {
+                        setCurrentFileIndex(currentFileIndex + 1);
+                    }}
+                >
                     Next
                 </Button>
             </CardFooter>
