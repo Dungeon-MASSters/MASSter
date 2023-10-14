@@ -22,6 +22,8 @@ jobs:
         cache-dependency-path: frontend/MASSter-frontend/package-lock.json
     - run: npm ci
       working-directory: frontend/MASSter-frontend
+    - run: cp .env.production.deploy .env.production
+      working-directory: frontend/MASSter-frontend
     - run: npm run build
       working-directory: frontend/MASSter-frontend
     - name: Save build
