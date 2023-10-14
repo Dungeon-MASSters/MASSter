@@ -103,12 +103,12 @@ function ModalResultWindow({item}: {item: RecordModel}) {
             <CardFooter>
                 <Button
                     disabled={currentFileIndex == 0}
-                    onClick={(e) => { setCurrentFileIndex(currentFileIndex - 1) }}>
+                    onClick={() => { setCurrentFileIndex(currentFileIndex - 1) }}>
                     Previous
                 </Button>
                 <Button
                     disabled={currentFileIndex == item.num_images - 1 }
-                    onClick={(e) => { setCurrentFileIndex(currentFileIndex + 1) }}>
+                    onClick={() => { setCurrentFileIndex(currentFileIndex + 1) }}>
                     Next
                 </Button>
             </CardFooter>
