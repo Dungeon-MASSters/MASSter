@@ -5,15 +5,14 @@ import pathlib
 from PIL import Image
 from libs import logger
 from libs.models import ImageGenerationModel
-from libs.config import settings
-import torch
+import urllib.request
 
 class Pipeline:
     def __init__(self) -> None:
-        self.pb: PocketBase = PocketBase(settings.PB_LINK)
+        self.pb: PocketBase = PocketBase("https://pb.apps.npod.space/")
         self.admin_data = self.pb.admins.auth_with_password(
-            settings.PB_LOGIN, 
-            settings.PB_PWD)
+            "dev@email.local", 
+            "6c6297287af76472")
         
         self.model = ImageGenerationModel()
         self.model.load_kandinsky()
@@ -22,7 +21,7 @@ class Pipeline:
         while True:
            # logger.info('listening to the collection')
             try:
-                records = self.pb.collection(settings.COL_NAME).get_list(
+                records = self.pb.collection('text_generation_mvp').get_list(
                     page=1,
                     per_page=1,
                     query_params={
@@ -48,7 +47,7 @@ class Pipeline:
 
                 images = self.process_generation(records.items[0], width=width, height=height)
                 if len(images) == 0:
-                    self.pb.collection(settings.COL_NAME).update(
+                    self.pb.collection('text_generation_mvp').update(
                         id=records.items[0].id,
                         body_params={
                             "status": "error"
@@ -57,7 +56,7 @@ class Pipeline:
                     logger.error('Не было создано ни одного изображения')
                     continue
 
-                self.pb.collection(settings.COL_NAME).update(
+                self.pb.collection('text_generation_mvp').update(
                     id=records.items[0].id,
                     body_params={
                         "status": "generated",
@@ -75,7 +74,7 @@ class Pipeline:
                     image.save(path)
                     uploads.append((path, open(path, mode='rb')))
 
-                self.pb.collection(settings.COL_NAME).update(
+                self.pb.collection('text_generation_mvp').update(
                     id=records.items[0].id,
                     body_params={
                         "status": "generated",
@@ -91,18 +90,37 @@ class Pipeline:
     def process_generation(self, data, width, height) -> list[Image.Image]:
         # self.pb.get_file_url(data, filename=f'tmp/{data.record.image}')
 
-        torch.cuda.empty_cache()
+        if data.input_image != '':
+            try:
+                image_url = self.pb.collection('text_generation_mvp').get_file_url(data, filename=data.input_image) 
+                urllib.request.urlretrieve(image_url, data.input_image)
 
-        images = self.model.generate(
-            num_steps=50,
-            guidance_scale=4.0,
-            height=height,
-            width=width,
-            prompt=data.prompt,
-            style=data.style,
-            negative_prompt=data.negative_prompt,
-            num_images=data.num_images
-        )
+                images = self.model.generate_based_on_image(
+                    image_path=image_url,
+                    num_steps=50,
+                    guidance_scale=4.0,
+                    height=height,
+                    width=width,
+                    prompt=data.prompt,
+                    style=data.style,
+                    negative_prompt=data.negative_prompt,
+                    num_images=data.num_images
+                )
+
+                return images
+            except:
+                logger.error('Ошибка при скачивании референса, генерирую без референса')
+
+            images = self.model.generate(
+                num_steps=50,
+                guidance_scale=4.0,
+                height=height,
+                width=width,
+                prompt=data.prompt,
+                style=data.style,
+                negative_prompt=data.negative_prompt,
+                num_images=data.num_images
+            )
 
         return images
 

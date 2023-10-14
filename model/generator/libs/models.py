@@ -150,6 +150,26 @@ class ImageGenerationModel:
         num_images: int
         ) -> list[Image.Image]:
 
+        if style != '': prompt +=  f', {style}'
+        if negative_prompt == '':
+            negative_prompt = (
+                'lowres, text, error, cropped, worst quality, '
+                +'low quality, jpeg artifacts, ugly, duplicate, '
+                + 'morbid, mutilated, out of frame, extra fingers, '
+                + 'mutated hands, poorly drawn hands, poorly drawn face, '
+                + 'mutation, deformed, blurry, dehydrated, bad anatomy, '
+                + 'bad proportions, extra limbs, cloned face, disfigured, '
+                + 'gross proportions, malformed limbs, missing arms, '
+                + 'missing legs, extra arms, extra legs, fused fingers, '
+                + 'too many fingers, long neck, username, watermark, signature'
+            )
+            
+        if num_steps < 1: num_steps = 1
+        if height < 1: height = 380
+        if width < 1: width = 720
+        if guidance_scale < 0: guidance_scale = 4.0
+
+
         try:
             reference_image = Image.open(image_path, mode='r')
             hint = self.make_hint(reference_image, self.depth_estimator).unsqueeze(0).half().to("cuda")
@@ -164,6 +184,7 @@ class ImageGenerationModel:
 
             images = self.pipe(
                 image_embeds=image_emb,
+                guidance_scale=guidance_scale,
                 negative_image_embeds=zero_image_emb,
                 hint=hint,
                 num_inference_steps=num_steps,
