@@ -111,7 +111,7 @@ function ModalResultWindow({item, openChange}: ModalResWindowProps) {
 
     let elem = <IconLoader3 className="animate-spin"></IconLoader3>;
     if (fileQuery.isSuccess && fileQuery.data.length != 0) {
-        elem =  <img className="h-full w-full object-contain"
+        elem = <img className="h-full w-full object-contain"
             src={fileQuery.data}></img>
     };
 
@@ -134,7 +134,7 @@ function ModalResultWindow({item, openChange}: ModalResWindowProps) {
                 <CardHeader>Image</CardHeader>
                 <CardContent className="h-full">
                     <Button
-                        onClick={(e) => {
+                        onClick={(_) => {
                             pb.collection('text_generation_mvp')
                                 .update(item.id, { status: "open" })
                                 .then(_ => openChange(false));
