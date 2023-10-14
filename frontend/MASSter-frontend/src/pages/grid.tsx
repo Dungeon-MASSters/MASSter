@@ -52,11 +52,11 @@ export function GridPage() {
             </div>
             <ImageGrid imgType={imgType}></ImageGrid>
             <Button
-                className="w-fit h-fit fixed bottom-12 right-12 shadow-md shadow-white"
+                className="h-fit fixed bottom-12 right-12 shadow-md shadow-white aspect-square rounded-full"
                 onClick={() => {
                     navigate(`/generate`);
                 }}>
-                <IconPlus size={32}></IconPlus><IconBrush size={48}></IconBrush>
+                <IconPlus size={28}></IconPlus><IconBrush size={48}></IconBrush>
             </Button>
         </div>
     );
