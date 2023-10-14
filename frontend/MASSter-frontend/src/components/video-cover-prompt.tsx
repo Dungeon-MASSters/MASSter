@@ -335,7 +335,7 @@ export function VideoCoverAdvancedPromptForm({
                                                     onBlur={field.onBlur}
                                                     onChange={(e) =>
                                                         field.onChange(
-                                                            e.target.files
+                                                            e.target.files?.[0]
                                                         )
                                                     }
                                                 />
