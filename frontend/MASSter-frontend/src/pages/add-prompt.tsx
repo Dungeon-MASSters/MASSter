@@ -40,7 +40,7 @@ export function AddPromptPage() {
                     onCheckedChange={setAdvancedMode}
                 />
                 <Label htmlFor="enable-advanced">
-                    {advancedMode ? "Продвинутый режим" : "Прстой режим"}
+                    {advancedMode ? "Продвинутый режим" : "Простой режим"}
                 </Label>
             </div>
 
