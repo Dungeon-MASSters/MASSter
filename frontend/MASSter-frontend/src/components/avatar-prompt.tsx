@@ -1,5 +1,6 @@
 import {
     ACCEPTED_IMAGE_TYPES,
+    ACCEPTED_VIDEO_TYPES,
     STYLES
 } from "@/lib/consts";
 import { pb } from "@/lib/pb-client";
@@ -45,7 +46,18 @@ export function AvatarSimplePromptForm({
     onError: (err: any) => void;
 }) {
     const FormSchema = z.object({
-        prompt: z.string().min(3).max(500)
+        video: z
+            .custom<FileList>((v) => v instanceof FileList, {
+                message: "Нужно загрузить видеоролики"
+            })
+            .refine((files) => {
+                for (let file of files) {
+                    if (!ACCEPTED_VIDEO_TYPES.includes(file.type)) {
+                        return false;
+                    }
+                }
+                return true;
+            }, "Пока мы поддерживаем только .mp4 видеоролики")
     });
 
     const form = useForm<z.infer<typeof FormSchema>>({
@@ -58,7 +70,9 @@ export function AvatarSimplePromptForm({
         formData.append("status", "open");
         formData.append("type", "avatar");
         formData.append("num_images", "3");
-        formData.append("prompt", form.getValues().prompt);
+        for (let file of form.getValues().video) {
+            formData.append("video", file);
+        }
         return formData;
     };
 
@@ -83,7 +97,8 @@ export function AvatarSimplePromptForm({
                 <CardTitle>Генерация аватарки</CardTitle>
                 <CardDescription>
                     Простой режим генерации аватарки канала, в качестве входных
-                    данных используется только текстовое описание
+                    данных используется набор видеороликов, по которым
+                    автоматически определяется тематика канала
                 </CardDescription>
             </CardHeader>
 
@@ -105,20 +120,27 @@ export function AvatarSimplePromptForm({
                             >
                                 <FormField
                                     control={form.control}
-                                    name="prompt"
+                                    name="video"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Описание</FormLabel>
+                                            <FormLabel>Видеоролики</FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    type="text"
-                                                    placeholder="Описание"
-                                                    {...field}
+                                                    type="file"
+                                                    multiple={true}
+                                                    onBlur={field.onBlur}
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.files
+                                                        )
+                                                    }
+                                                    accept="video/mp4"
                                                 />
                                             </FormControl>
                                             <FormDescription>
-                                                Текстовое описание того, что
-                                                должно быть на аватарке канала
+                                                Несколько видеороликов, на
+                                                основе которых будет сгенерирова
+                                                аватарка для канала
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>

@@ -18,10 +18,12 @@ import {
     IconBrush,
     IconLogout,
     IconPhoto,
+    IconPhotoStar,
     IconUser
 } from "@tabler/icons-react";
 import clsx from "clsx";
 import { EditorPage } from "./pages/editor";
+import { EditedCoversPage } from "./pages/edited";
 
 function App() {
     const {
@@ -62,6 +64,16 @@ function App() {
                             <NavigationMenuLink className="flex gap-1">
                                 <IconPhoto />
                                 <span>результаты генерации</span>
+                            </NavigationMenuLink>
+                        </Link>
+                    </NavigationMenuItem>
+                    <NavigationMenuItem
+                        className={clsx(navigationMenuTriggerStyle())}
+                    >
+                        <Link href="/gallery">
+                            <NavigationMenuLink className="flex gap-1">
+                                <IconPhotoStar />
+                                <span>галерея</span>
                             </NavigationMenuLink>
                         </Link>
                     </NavigationMenuItem>
@@ -115,12 +127,13 @@ function App() {
 
             <Switch>
                 <Route path="/grid" component={GridPage} />
+                <Route path="/gallery" component={EditedCoversPage} />
                 <Route path="/generate">
                     <AddPromptPage />
                 </Route>
 
-                <Route path="/editor">
-                    <EditorPage />
+                <Route path="/editor/:file_url">
+                    {(params) => <EditorPage fileUrlB64={params.file_url} />}
                 </Route>
                 <Route>
                     <Redirect to="/grid" />

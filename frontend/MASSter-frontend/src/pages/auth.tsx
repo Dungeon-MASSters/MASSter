@@ -43,7 +43,7 @@ export function AuthPage({ onSuccess, onError }: authPageProps) {
                 <div className="absolute top-0 right-0 h-full w-full bg-gradient-to-r to-black from-transparent"></div>
                 <div className="absolute top-0 right-0 h-full w-full p-10">
                     <div className="h-full w-full flex max-w-2xl justify-center items-center flex-col">
-                        <div className="text-white text-6xl text-center font-bold mb-5">Жестко насрали</div>
+                        <div className="text-white text-6xl text-center font-bold mb-5">Обложкер</div>
                         <div className="text-gray-200 text-2xl text-center">Генерируйте арты к своим видео</div>
                     </div>
                 </div>

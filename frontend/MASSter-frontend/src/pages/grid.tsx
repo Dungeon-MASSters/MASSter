@@ -18,9 +18,9 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocation } from "wouter";
 
 enum ImgType {
-    banner = 'banner',
-    video = 'video',
-    avatar = 'avatar'
+    banner = "banner",
+    video = "video",
+    avatar = "avatar"
 }
 
 export function GridPage() {
@@ -30,23 +30,31 @@ export function GridPage() {
         <div>
             <div className="py-4 w-full flex justify-center">
                 <Tabs
-                    defaultValue={ImgType.video} className="w-1/2"
+                    defaultValue={ImgType.video}
+                    className="w-1/2"
                     onValueChange={(e) => {
-                        setImgType(ImgType[e as keyof typeof ImgType] ?? ImgType.video)
-                    }}>
+                        setImgType(
+                            ImgType[e as keyof typeof ImgType] ?? ImgType.video
+                        );
+                    }}
+                >
                     <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value={ImgType.video}>Обложки</TabsTrigger>
-                        <TabsTrigger value={ImgType.avatar}>Аватары</TabsTrigger>
-                        <TabsTrigger value={ImgType.banner}>Баннеры</TabsTrigger>
+                        <TabsTrigger value={ImgType.avatar}>
+                            Аватары
+                        </TabsTrigger>
+                        <TabsTrigger value={ImgType.banner}>
+                            Баннеры
+                        </TabsTrigger>
                     </TabsList>
                 </Tabs>
             </div>
             <ImageGrid imgType={imgType}></ImageGrid>
         </div>
-    )
+    );
 }
 
-function ImageGrid({imgType}: {imgType: ImgType}) {
+function ImageGrid({ imgType }: { imgType: ImgType }) {
     const listQuery = useQuery(
         [`get-gen-list-${imgType}`],
         () => {
@@ -175,9 +183,13 @@ function ModalResultWindow({ item, canEdit, openChange }: ModalResWindowProps) {
 
     let elem = <IconLoader3 className="animate-spin"></IconLoader3>;
     if (fileQuery.isSuccess && fileQuery.data.length != 0) {
-        elem = <img className="flex-grow object-contain h-0 w-full"
-            src={fileQuery.data}></img>
-    };
+        elem = (
+            <img
+                className="flex-grow object-contain h-0 w-full"
+                src={fileQuery.data}
+            ></img>
+        );
+    }
 
     return (
         <div className="flex h-full w-full">
@@ -187,12 +199,18 @@ function ModalResultWindow({ item, canEdit, openChange }: ModalResWindowProps) {
                     <div className="flex justify-between mt-6">
                         <Button
                             disabled={currentFileIndex == 0}
-                            onClick={() => { setCurrentFileIndex(currentFileIndex - 1) }}>
+                            onClick={() => {
+                                setCurrentFileIndex(currentFileIndex - 1);
+                            }}
+                        >
                             Previous
                         </Button>
                         <Button
-                            disabled={currentFileIndex == item.num_images - 1 }
-                            onClick={() => { setCurrentFileIndex(currentFileIndex + 1) }}>
+                            disabled={currentFileIndex == item.num_images - 1}
+                            onClick={() => {
+                                setCurrentFileIndex(currentFileIndex + 1);
+                            }}
+                        >
                             Next
                         </Button>
                     </div>
@@ -205,12 +223,20 @@ function ModalResultWindow({ item, canEdit, openChange }: ModalResWindowProps) {
                         onClick={() => {
                             pb.collection("text_generation_mvp")
                                 .update(item.id, { status: "open" })
-                                .then(_ => openChange(false));
-                        }}>Перегенерировать</Button>
-                    {canEdit
-                        ? <Button onClick={() => {
-                            navigate('/editor')}}>Изменить картинку</Button>
-                        : undefined}
+                                .then((_) => openChange(false));
+                        }}
+                    >
+                        Перегенерировать
+                    </Button>
+                    {canEdit && fileQuery.data ? (
+                        <Button
+                            onClick={() => {
+                                navigate(`/editor/${btoa(fileQuery.data)}`);
+                            }}
+                        >
+                            Редактировать
+                        </Button>
+                    ) : undefined}
                 </div>
             </div>
         </div>
