@@ -1,6 +1,6 @@
 import PocketBase from "pocketbase";
 
-export const pb = new PocketBase("https://pb.apps.npod.space");
+export const pb = new PocketBase(import.meta.env.VITE_PB_HOST);
 // pb.autoCancellation(false);
 
 
