@@ -54,7 +54,7 @@ function App() {
     return (
         <div className="container">
             <NavigationMenu className="mx-auto my-2">
-                <NavigationMenuList className="">
+                <NavigationMenuList className="flex flex-col sm:flex-row">
                     <NavigationMenuItem
                         className={clsx(navigationMenuTriggerStyle())}
                     >
