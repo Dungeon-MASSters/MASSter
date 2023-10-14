@@ -81,8 +81,14 @@ class VideoParser:
 
         filename = folder_dir
 
+        frame_count = int(video_clip.duration / 60 * 5)
+        if frame_count < 50:
+            frame_count = int(video_clip.duration * 0.7)
+        else if frame_count > 200:
+            frame_count = int(video_clip.duration * 0.7)
+            
         # перебираем каждый возможный кадр
-        for i in range(int(video_clip.duration / 60 * 5)):
+        for i in range(frame_count):
         #10 рандомных кадров из видео
         #for i in range(20):
             current_duration = random.uniform(video_clip.duration * 0.15, video_clip.duration * 0.85)
@@ -112,5 +118,5 @@ class VideoParser:
 
         article = ''.join(str(x) for x in desc)
         
-        return self.summarizer(article, max_length=130, min_length=30, do_sample=False)
+        return self.summarizer(article[:4000], max_length=130, min_length=30, do_sample=False)
     
