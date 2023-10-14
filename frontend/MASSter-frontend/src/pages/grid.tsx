@@ -10,7 +10,7 @@ import { pb } from "@/lib/pb-client";
 import { RecordModel } from "pocketbase";
 import { useQuery } from "react-query";
 import imgPlaceholder from "/src/assets/img/img-placeholder.webp";
-import { IconLoader3 } from "@tabler/icons-react";
+import { IconLoader3, IconPlus } from "@tabler/icons-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,7 @@ export function GridPage() {
                 </Tabs>
             </div>
             <ImageGrid imgType={imgType}></ImageGrid>
-            <Button></Button>
+            <Button className="text-2xl"><IconPlus></IconPlus></Button>
         </div>
     );
 }
