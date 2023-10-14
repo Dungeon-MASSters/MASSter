@@ -101,7 +101,6 @@ type ModalResWindowProps = {
 
 function ModalResultWindow({item, openChange}: ModalResWindowProps) {
     const [currentFileIndex, setCurrentFileIndex] = useState(0);
-    // const [open, setOpen] = openState;
 
     const fileQuery = useQuery(
         [`get-file-${item.id}-${currentFileIndex}`],
