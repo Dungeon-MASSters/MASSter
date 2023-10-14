@@ -10,7 +10,7 @@ import { pb } from "@/lib/pb-client";
 import { RecordModel } from "pocketbase";
 import { useQuery } from "react-query";
 import imgPlaceholder from "/src/assets/img/img-placeholder.webp";
-import { IconLoader3, IconPlus } from "@tabler/icons-react";
+import { IconBrush, IconLoader3, IconPlus } from "@tabler/icons-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ enum ImgType {
 
 export function GridPage() {
     const [imgType, setImgType] = useState(ImgType.video);
+    const [_, navigate] = useLocation();
 
     return (
         <div>
@@ -50,7 +51,13 @@ export function GridPage() {
                 </Tabs>
             </div>
             <ImageGrid imgType={imgType}></ImageGrid>
-            <Button className="text-2xl"><IconPlus></IconPlus></Button>
+            <Button
+                className="w-fit h-fit fixed bottom-12 right-12 shadow-md shadow-white"
+                onClick={() => {
+                    navigate(`/generate`);
+                }}>
+                <IconPlus size={32}></IconPlus><IconBrush size={48}></IconBrush>
+            </Button>
         </div>
     );
 }
