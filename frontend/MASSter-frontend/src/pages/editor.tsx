@@ -7,8 +7,10 @@ import FilerobotImageEditor, {
     TABS,
     TOOLS
 } from "react-filerobot-image-editor";
+import { useLocation } from "wouter";
 
 export function EditorPage({ fileUrlB64 }: { fileUrlB64: string }) {
+    const [_, navigate] = useLocation();
     const user = useUser(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isError, setIsError] = useState(false);
@@ -62,6 +64,7 @@ export function EditorPage({ fileUrlB64 }: { fileUrlB64: string }) {
                             .create(formData)
                             .then(() => {
                                 console.log("saved");
+                                navigate("/gallery");
                             })
                             .catch(() => setIsError(true));
                     });
