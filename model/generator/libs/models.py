@@ -1,16 +1,28 @@
-from diffusers import KandinskyV22Pipeline, KandinskyV22PriorPipeline
+from diffusers import KandinskyV22Pipeline, KandinskyV22PriorPipeline, KandinskyV22ControlnetPipeline
 import torch
 from PIL import Image
-from typing import Union
-import uuid
+from typing import Callable
 from transformers import CLIPVisionModelWithProjection
 from diffusers.models import UNet2DConditionModel
-from libs import logger
+import gc
+
+def collect_cache() -> None:
+    torch.cuda.empty_cache()
+    gc.collect()
+
+def free_cache(func: Callable) -> Callable:
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        collect_cache()
+        return result
+    
+    return wrapper
 
 class ImageGenerationModel:
     def __init__(self) -> None:
         self.DEVICE = torch.device('cuda:0')
 
+    @free_cache
     def load_kandinsky(self) -> None:
         self.image_encoder = CLIPVisionModelWithProjection.from_pretrained(
             'kandinsky-community/kandinsky-2-2-prior',
@@ -34,6 +46,17 @@ class ImageGenerationModel:
             torch_dtype=torch.float16
         ).to(self.DEVICE)
 
+    # @free_cache
+    # def load_depth_model(self):
+    #     self.pipe = KandinskyV22ControlnetPipeline.from_pretrained(
+    #         "kandinsky-community/kandinsky-2-2-controlnet-depth", torch_dtype=torch.float16
+    #     ).to(self.DEVICE)
+
+    # @free_cache
+    # def remove_depth_model(self):
+    #     del self.pipe
+
+    @free_cache
     def generate(self, 
         num_steps: int, 
         guidance_scale: float, 

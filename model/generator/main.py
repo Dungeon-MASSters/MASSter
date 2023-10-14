@@ -79,6 +79,7 @@ class Pipeline:
                 )
 
             except:
+                raise
                 logger.error('Ошибка при чтении коллекции')
                 time.sleep(3)
 
@@ -88,10 +89,10 @@ class Pipeline:
         torch.cuda.empty_cache()
 
         images = self.model.generate(
-            num_steps=200,
+            num_steps=20,
             guidance_scale=4.0,
-            height=300,
-            width=500,
+            height=800,
+            width=800,
             prompt=data.prompt,
             style=data.style,
             negative_prompt=data.negative_prompt,
