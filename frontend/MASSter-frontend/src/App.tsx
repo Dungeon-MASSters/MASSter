@@ -17,7 +17,6 @@ import {
 } from "./components/ui/navigation-menu";
 import {
     IconBrush,
-    IconFrame,
     IconLogout,
     IconPhoto,
     IconUser
