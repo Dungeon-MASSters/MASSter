@@ -77,7 +77,7 @@ function App() {
                             </NavigationMenuLink>
                         </Link>
                     </NavigationMenuItem>
-                    <NavigationMenuItem
+                    {/* <NavigationMenuItem
                         className={clsx(navigationMenuTriggerStyle())}
                     >
                         <Link href="/editor">
@@ -86,7 +86,7 @@ function App() {
                                 <span>редактор</span>
                             </NavigationMenuLink>
                         </Link>
-                    </NavigationMenuItem>
+                    </NavigationMenuItem> */}
                     <NavigationMenuItem>
                         <NavigationMenuTrigger className="flex gap-1">
                             <IconUser />
