@@ -99,20 +99,30 @@ class VideoParser:
             video_clip.save_frame(frame_filename, current_duration)
         return folder_dir
 
-    def get_desc_from_video(self, video_file: str) -> str:
-        if not video_file.endswith('.mp4'):
+    def get_desc_from_video(self, video_files) -> str:
+
+        result_summary = []
+        for video_file in video_files:
+            if not video_file.endswith('.mp4'):
+                return ''
+
+            folder_dir = self.video_parser(video_file)
+            desc = []
+            for images in os.listdir(folder_dir):
+                desc.append(self.generate_desc(folder_dir + '/' + images))
+
+            if os.path.exists(folder_dir):
+                shutil.rmtree(folder_dir)
+
+            summary_desc = self.get_summary(desc)
+            result_summary.append(summary_desc)
+
+        if len(result_summary) > 1:
+            return self.get_summary(result_summary)
+        elif len(result_summary) == 1:
+            return result_summary[0]
+        else:
             return ''
-
-        folder_dir = self.video_parser(video_file)
-        desc = []
-        for images in os.listdir(folder_dir):
-            desc.append(self.generate_desc(folder_dir + '/' + images))
-
-        if os.path.exists(folder_dir):
-            shutil.rmtree(folder_dir)
-
-        summary_desc = self.get_summary(desc)
-        return summary_desc
     
     def get_summary(self, desc) -> str:
 

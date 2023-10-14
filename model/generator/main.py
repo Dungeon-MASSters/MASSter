@@ -6,13 +6,14 @@ from PIL import Image
 from libs import logger
 from libs.models import ImageGenerationModel
 import urllib.request
+from libs.config import settings
 
 class Pipeline:
     def __init__(self) -> None:
-        self.pb: PocketBase = PocketBase("https://pb.apps.npod.space/")
+        self.pb: PocketBase = PocketBase(settings.PB_LINK)
         self.admin_data = self.pb.admins.auth_with_password(
-            "dev@email.local", 
-            "6c6297287af76472")
+            settings.PB_LOGIN, 
+            settings.PB_PWD)
         
         self.model = ImageGenerationModel()
         self.model.load_kandinsky()
@@ -21,7 +22,7 @@ class Pipeline:
         while True:
            # logger.info('listening to the collection')
             try:
-                records = self.pb.collection('text_generation_mvp').get_list(
+                records = self.pb.collection(settings.COL_NAME).get_list(
                     page=1,
                     per_page=1,
                     query_params={
@@ -47,7 +48,7 @@ class Pipeline:
 
                 images = self.process_generation(records.items[0], width=width, height=height)
                 if len(images) == 0:
-                    self.pb.collection('text_generation_mvp').update(
+                    self.pb.collection(settings.COL_NAME).update(
                         id=records.items[0].id,
                         body_params={
                             "status": "error"
@@ -56,7 +57,7 @@ class Pipeline:
                     logger.error('Не было создано ни одного изображения')
                     continue
 
-                self.pb.collection('text_generation_mvp').update(
+                self.pb.collection(settings.COL_NAME).update(
                     id=records.items[0].id,
                     body_params={
                         "status": "generated",
@@ -74,7 +75,7 @@ class Pipeline:
                     image.save(path)
                     uploads.append((path, open(path, mode='rb')))
 
-                self.pb.collection('text_generation_mvp').update(
+                self.pb.collection(settings.COL_NAME).update(
                     id=records.items[0].id,
                     body_params={
                         "status": "generated",
@@ -92,7 +93,7 @@ class Pipeline:
 
         if data.input_image != '' and data.type == 'avatar':
             try:
-                image_url = self.pb.collection('text_generation_mvp').get_file_url(data, filename=data.input_image) 
+                image_url = self.pb.collection(settings.COL_NAME).get_file_url(data, filename=data.input_image) 
                 urllib.request.urlretrieve(image_url, data.input_image)
 
                 self.model.remove_models()
