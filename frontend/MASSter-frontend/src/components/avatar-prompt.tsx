@@ -192,7 +192,7 @@ export function AvatarAdvancedPromptForm({
         //         "Пока мы поддерживаем только .mp4 видеоролики :("
         //     )
         //     .optional(),
-        numImages: z.coerce.number().min(1).max(7).default(1)
+        numImages: z.coerce.number().min(1).max(7)
     });
 
     const form = useForm<z.infer<typeof FormSchema>>({
