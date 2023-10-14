@@ -115,7 +115,6 @@ function App() {
             </NavigationMenu>
 
             <Switch>
-                <Route path="/" component={MainPage} />
                 <Route path="/grid" component={GridPage} />
                 <Route path="/generate">
                     <AddPromptPage />
@@ -125,7 +124,7 @@ function App() {
                     <EditorPage />
                 </Route>
                 <Route>
-                    <Redirect to="/" />
+                    <Redirect to="/grid" />
                 </Route>
             </Switch>
         </div>
