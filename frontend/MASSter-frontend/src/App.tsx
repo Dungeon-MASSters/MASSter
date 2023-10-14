@@ -60,6 +60,16 @@ function App() {
                     <NavigationMenuItem
                         className={clsx(navigationMenuTriggerStyle())}
                     >
+                        <Link href="/generate">
+                            <NavigationMenuLink className="flex gap-1">
+                                <IconBrush />
+                                <span>создать дизайн</span>
+                            </NavigationMenuLink>
+                        </Link>
+                    </NavigationMenuItem>
+                    <NavigationMenuItem
+                        className={clsx(navigationMenuTriggerStyle())}
+                    >
                         <Link href="/grid">
                             <NavigationMenuLink className="flex gap-1">
                                 <IconPhoto />
@@ -74,16 +84,6 @@ function App() {
                             <NavigationMenuLink className="flex gap-1">
                                 <IconPhotoStar />
                                 <span>галерея</span>
-                            </NavigationMenuLink>
-                        </Link>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem
-                        className={clsx(navigationMenuTriggerStyle())}
-                    >
-                        <Link href="/generate">
-                            <NavigationMenuLink className="flex gap-1">
-                                <IconBrush />
-                                <span>создать дизайн</span>
                             </NavigationMenuLink>
                         </Link>
                     </NavigationMenuItem>
