@@ -8,9 +8,11 @@ import { GridPage } from "./pages/grid";
 import { AddPromptPage } from "./pages/add-prompt";
 import {
     NavigationMenu,
+    NavigationMenuContent,
     NavigationMenuItem,
     NavigationMenuLink,
     NavigationMenuList,
+    NavigationMenuTrigger,
     navigationMenuTriggerStyle
 } from "./components/ui/navigation-menu";
 import {
@@ -51,8 +53,8 @@ function App() {
 
     return (
         <div className="container">
-            <NavigationMenu className="mx-auto">
-                <NavigationMenuList className="justify-between flex">
+            <NavigationMenu className="mx-auto my-2">
+                <NavigationMenuList className="">
                     <NavigationMenuItem
                         className={clsx(navigationMenuTriggerStyle())}
                     >
@@ -74,28 +76,31 @@ function App() {
                         </Link>
                     </NavigationMenuItem>
                     <NavigationMenuItem
-                        className={clsx(navigationMenuTriggerStyle())}
+                        className={clsx(navigationMenuTriggerStyle(), "flex")}
                     >
-                        <NavigationMenuLink className="flex gap-1">
+                        <NavigationMenuTrigger className="flex gap-1">
                             <IconUser />
                             <span>{user.record["username"]}</span>
-                        </NavigationMenuLink>
-                    </NavigationMenuItem>
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent>
+                            <div className="p-2 font-bold">
+                                Вы вошли как {user.record["username"]}
+                            </div>
 
-                    <NavigationMenuItem
-                        className={clsx(navigationMenuTriggerStyle())}
-                    >
-                        <NavigationMenuLink
-                            className="flex gap-1"
-                            onClick={() => {
-                                console.log("logout");
-                                logoutUser();
-                                invalidateUser(qc).then(() => refetchUser());
-                            }}
-                        >
-                            <IconLogout />
-                            <span>выйти</span>
-                        </NavigationMenuLink>
+                            <NavigationMenuLink
+                                className="flex gap-1 w-[300px] p-2 hover:bg-secondary hover:text-secondary-foreground"
+                                onClick={() => {
+                                    console.log("logout");
+                                    logoutUser();
+                                    invalidateUser(qc).then(() =>
+                                        refetchUser()
+                                    );
+                                }}
+                            >
+                                <IconLogout />
+                                <span>выйти</span>
+                            </NavigationMenuLink>
+                        </NavigationMenuContent>
                     </NavigationMenuItem>
                 </NavigationMenuList>
             </NavigationMenu>
