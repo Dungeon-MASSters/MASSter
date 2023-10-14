@@ -36,20 +36,20 @@ export function AuthPage({ onSuccess, onError }: authPageProps) {
     );
 
     return (
-        <div className="flex absolute top-0 left-0 h-[100vh] w-[100vw] bg-black">
-            <div className="flex-grow relative h-full w-0">
+        <div className="flex flex-col items-center md:flex-row absolute top-0 left-0 h-[100vh] w-[100vw] bg-black">
+            <div className="h-1/2 md:flex-grow w-full md:h-full md:w-0 relative">
                 <img src={samPic} className="h-full w-full object-cover"></img>
                 <div className="absolute top-0 left-0 h-full w-full bg-black opacity-40"></div>
-                <div className="absolute top-0 right-0 h-full w-full bg-gradient-to-r to-black from-transparent"></div>
+                <div className="absolute top-0 right-0 h-full w-full bg-gradient-to-b md:bg-gradient-to-r to-black from-transparent"></div>
                 <div className="absolute top-0 right-0 h-full w-full p-10">
-                    <div className="h-full w-full flex max-w-2xl justify-center items-center flex-col">
+                    <div className="h-full w-full flex justify-center items-center flex-col">
                         <div className="text-white text-6xl text-center font-bold mb-5">Обложкер</div>
                         <div className="text-gray-200 text-2xl text-center">Генерируйте арты к своим видео</div>
                     </div>
                 </div>
             </div>
-            <div className="max-w-lg px-20 h-full">
-                <div className="flex justify-center h-full p-4 items-center">
+            <div className="flex-grow md:max-w-lg min-w-fit px-16 lg:pe-20 h-0 md:h-full md:flex-grow-0 md:w-1/3 md:min-w-min">
+                <div className="flex justify-center h-full px-4 items-center">
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-center">Войти или зарегистрироваться</CardTitle>

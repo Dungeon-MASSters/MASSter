@@ -10,7 +10,7 @@ import { pb } from "@/lib/pb-client";
 import { RecordModel } from "pocketbase";
 import { useQuery } from "react-query";
 import imgPlaceholder from "/src/assets/img/img-placeholder.webp";
-import { IconLoader3 } from "@tabler/icons-react";
+import { IconLoader3, IconPlus } from "@tabler/icons-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,7 @@ export function GridPage() {
                 </Tabs>
             </div>
             <ImageGrid imgType={imgType}></ImageGrid>
+            <Button className="text-2xl"><IconPlus></IconPlus></Button>
         </div>
     );
 }
@@ -109,10 +110,19 @@ function ImageGrid({ imgType }: { imgType: ImgType }) {
                 </Dialog>
             );
         } else {
-            grid = <div>No items!</div>;
+            grid = <div className="text-gray-600 text-lg">
+                <p>
+                    <span className="inline-block mb-2 font-semibold">Нет изображений в данной категории!</span><br/>
+                    Вот, что с этим можно сделать:
+                </p>
+                <ul>
+                    <li>• Нажмите кнопку в правом нижнем углу страницы, чтобы сгенерировать изображение...</li>
+                    <li>• ... или же выберите нужный раздел вверху!</li>
+                </ul>
+            </div>;
         }
     } else {
-        grid = <div>Error</div>;
+        grid = <div className="text-gray-600 text-lg">Произошла какая-то ошибка. Мы уже над ней работаем!</div>;
     }
 
     return grid;
@@ -203,7 +213,7 @@ function ModalResultWindow({ item, canEdit, openChange }: ModalResWindowProps) {
                                 setCurrentFileIndex(currentFileIndex - 1);
                             }}
                         >
-                            Previous
+                            Пред.
                         </Button>
                         <Button
                             disabled={currentFileIndex == item.num_images - 1}
@@ -211,7 +221,7 @@ function ModalResultWindow({ item, canEdit, openChange }: ModalResWindowProps) {
                                 setCurrentFileIndex(currentFileIndex + 1);
                             }}
                         >
-                            Next
+                            След.
                         </Button>
                     </div>
                 </div>
