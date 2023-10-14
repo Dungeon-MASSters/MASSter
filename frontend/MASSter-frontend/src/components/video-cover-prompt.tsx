@@ -162,17 +162,13 @@ export function VideoCoverAdvancedPromptForm({
         negativePrompt: z.string().max(500).optional(),
         style: z.string().default("Нет"),
         inputImage: z
-            .custom<FileList>((v) => v instanceof FileList, {
+            .custom<File>((v) => v instanceof File, {
                 message: "Нужно загрузить картинки для референса"
             })
-            .refine((files) => {
-                for (let file of files) {
-                    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-                        return false;
-                    }
-                }
-                return true;
-            }, "Пока мы поддерживаем только .png и .jpg изображения")
+            .refine(
+                (v) => ACCEPTED_IMAGE_TYPES.includes(v.type),
+                "Пока мы поддерживаем только .png и .jpg изображения"
+            )
             .optional(),
         video: z
             .custom<File>((v) => v instanceof File, {
@@ -204,9 +200,7 @@ export function VideoCoverAdvancedPromptForm({
         formData.append("num_images", `${data.numImages}`);
 
         if (data.inputImage) {
-            for (let file of data.inputImage) {
-                formData.append("input_image", file);
-            }
+            formData.append("input_image", data.inputImage);
         }
         if (data.video) {
             formData.append("video", data.video);
@@ -338,7 +332,6 @@ export function VideoCoverAdvancedPromptForm({
                                             <FormControl>
                                                 <Input
                                                     type="file"
-                                                    multiple={true}
                                                     onBlur={field.onBlur}
                                                     onChange={(e) =>
                                                         field.onChange(
