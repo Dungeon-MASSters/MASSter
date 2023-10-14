@@ -26,7 +26,7 @@ class Pipeline:
                     per_page=1,
                     query_params={
                         "filter": 'status = "preprocessed"',
-                        "sort": '-created'
+                        "sort": '+created'
                     }
                 )
 
@@ -35,14 +35,17 @@ class Pipeline:
                     time.sleep(3)
                     continue
 
-                # self.pb.collection('text_generation_mvp').update(
-                #     id=records.items[0].id,
-                #     body_params={
-                #         "status": "in_process"
-                #     }
-                # )
+                if records.items[0].type == 'video':
+                    width = 1280
+                    height = 720
+                elif records.items[0].type == 'banner':
+                    width = 2204
+                    height = 864
+                else:    
+                    width = 800
+                    height = 800
 
-                images = self.process_generation(records.items[0])
+                images = self.process_generation(records.items[0], width=width, height=height)
                 if len(images) == 0:
                     self.pb.collection('text_generation_mvp').update(
                         id=records.items[0].id,
@@ -83,16 +86,16 @@ class Pipeline:
                 logger.error('Ошибка при чтении коллекции')
                 time.sleep(3)
 
-    def process_generation(self, data) -> list[Image.Image]:
+    def process_generation(self, data, width, height) -> list[Image.Image]:
         # self.pb.get_file_url(data, filename=f'tmp/{data.record.image}')
 
         torch.cuda.empty_cache()
 
         images = self.model.generate(
-            num_steps=20,
+            num_steps=50,
             guidance_scale=4.0,
-            height=800,
-            width=800,
+            height=height,
+            width=width,
             prompt=data.prompt,
             style=data.style,
             negative_prompt=data.negative_prompt,

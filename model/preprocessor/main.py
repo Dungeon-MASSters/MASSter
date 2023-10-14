@@ -23,7 +23,7 @@ class Pipeline:
                     per_page=1,
                     query_params={
                         "filter": 'status = "open"',
-                        "sort": '-created'
+                        "sort": '+created'
                     }
                 )
 
