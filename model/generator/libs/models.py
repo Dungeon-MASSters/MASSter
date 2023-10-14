@@ -63,7 +63,7 @@ class ImageGenerationModel:
         if height < 1: height = 380
         if width < 1: width = 720
         if guidance_scale < 0: guidance_scale = 4.0
-        if style != '': prompt += f', {style}'
+        if style != '': prompt +=  f', {style}'
 
         try:
             img_emb = self.prior(
