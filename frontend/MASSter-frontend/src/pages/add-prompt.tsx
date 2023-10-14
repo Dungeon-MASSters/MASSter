@@ -32,7 +32,10 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import { VideoCoverSimplePromptForm } from "@/components/video-cover-prompt";
+import {
+    VideoCoverAdvancedPromptForm,
+    VideoCoverSimplePromptForm
+} from "@/components/video-cover-prompt";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
@@ -305,6 +308,7 @@ export function AddAdvancedPromptCard() {
 export function AddPromptPage() {
     const { data: user, isLoading } = useUser(false);
     const [advancedMode, setAdvancedMode] = useState(false);
+    const [_, navigate] = useLocation();
 
     if (isLoading || user === undefined) {
         return <IconLoader3 className="text-primary animate-spin mx-auto" />;
@@ -334,31 +338,29 @@ export function AddPromptPage() {
                     <TabsTrigger value="avatar">Автарка канала</TabsTrigger>
                 </TabsList>
                 <TabsContent value="video-cover">
-                    {advancedMode ? undefined : (
+                    {advancedMode ? (
+                        <VideoCoverAdvancedPromptForm
+                            user={user}
+                            onSuccess={() => {
+                                navigate("/grid");
+                            }}
+                            onError={() => {}}
+                        />
+                    ) : (
                         <VideoCoverSimplePromptForm
                             user={user}
-                            onSuccess={() => {}}
+                            onSuccess={() => {
+                                navigate("/grid");
+                            }}
                             onError={() => {}}
                         />
                     )}
                 </TabsContent>
                 <TabsContent value="banner">
-                    {advancedMode ? undefined : (
-                        <VideoCoverSimplePromptForm
-                            user={user}
-                            onSuccess={() => {}}
-                            onError={() => {}}
-                        />
-                    )}
+                    {advancedMode ? undefined : undefined}
                 </TabsContent>
                 <TabsContent value="avatar">
-                    {advancedMode ? undefined : (
-                        <VideoCoverSimplePromptForm
-                            user={user}
-                            onSuccess={() => {}}
-                            onError={() => {}}
-                        />
-                    )}
+                    {advancedMode ? undefined : undefined}
                 </TabsContent>
             </Tabs>
         </div>
