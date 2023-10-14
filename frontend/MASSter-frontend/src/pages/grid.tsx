@@ -46,7 +46,7 @@ export function GridPage() {
             return (
                 <Dialog open={open} onOpenChange={setOpen}>
                     <div className="grid grid-cols-4 gap-2">{gridItems}</div>
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent className="w-3/4 h-3/4">
                         <ModalResultWindow
                             item={currentItem ?? listQuery.data.items[0]}
                             openChange={setOpen}></ModalResultWindow>
@@ -111,36 +111,40 @@ function ModalResultWindow({item, openChange}: ModalResWindowProps) {
 
     let elem = <IconLoader3 className="animate-spin"></IconLoader3>;
     if (fileQuery.isSuccess && fileQuery.data.length != 0) {
-        elem = <img className="h-full w-full object-contain"
+        elem = <img className="flex-grow object-contain h-0 w-full"
             src={fileQuery.data}></img>
     };
 
     return (
-        <div className="flex">
-            <div>
-                {elem}
-                <Button
-                    disabled={currentFileIndex == 0}
-                    onClick={() => { setCurrentFileIndex(currentFileIndex - 1) }}>
-                    Previous
-                </Button>
-                <Button
-                    disabled={currentFileIndex == item.num_images - 1 }
-                    onClick={() => { setCurrentFileIndex(currentFileIndex + 1) }}>
-                    Next
-                </Button>
+        <div className="flex h-full w-full">
+            <div className="flex-grow w-0 pe-6">
+                <div className="flex flex-col w-full h-full justify-between">
+                    {elem}
+                    <div className="flex justify-between mt-6">
+                        <Button
+                            disabled={currentFileIndex == 0}
+                            onClick={() => { setCurrentFileIndex(currentFileIndex - 1) }}>
+                            Previous
+                        </Button>
+                        <Button
+                            disabled={currentFileIndex == item.num_images - 1 }
+                            onClick={() => { setCurrentFileIndex(currentFileIndex + 1) }}>
+                            Next
+                        </Button>
+                    </div>
+                </div>
             </div>
-            <Card className="w-full">
-                <CardHeader>Image</CardHeader>
-                <CardContent className="h-full">
+            <div className="w-1/3 h-full p-6 border-l-2 border-gray-200">
+                <div className="text-2xl mb-4">Image</div>
+                <div className="flex h-full flex-col align-middle">
                     <Button
                         onClick={(_) => {
                             pb.collection('text_generation_mvp')
                                 .update(item.id, { status: "open" })
                                 .then(_ => openChange(false));
                         }}>Перегенерировать</Button>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         </div>
     );
 }
