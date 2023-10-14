@@ -90,25 +90,37 @@ class Pipeline:
     def process_generation(self, data, width, height) -> list[Image.Image]:
         # self.pb.get_file_url(data, filename=f'tmp/{data.record.image}')
 
-        if data.input_image != '':
+        if data.input_image != '' and data.type == 'avatar':
             try:
                 image_url = self.pb.collection('text_generation_mvp').get_file_url(data, filename=data.input_image) 
                 urllib.request.urlretrieve(image_url, data.input_image)
 
+                reference_image = Image.open(data.input_image, mode='r')
+                reference_image = reference_image.resize(size=(768, 768))
+                reference_image.save(data.input_image)
+
+                self.model.remove_models()
+                self.model.load_depth_model()
                 images = self.model.generate_based_on_image(
-                    image_path=image_url,
+                    image_path=data.input_image,
                     num_steps=50,
                     guidance_scale=4.0,
-                    height=height,
-                    width=width,
+                    height=768,
+                    width=768,
                     prompt=data.prompt,
                     style=data.style,
                     negative_prompt=data.negative_prompt,
                     num_images=data.num_images
                 )
+                self.model.remove_depth_model()
+                self.model.load_kandinsky()
+
+                for image in images:
+                    image = image.resize(size=(800, 800))
 
                 return images
             except:
+                raise
                 logger.error('Ошибка при скачивании референса, генерирую без референса')
 
             images = self.model.generate(
