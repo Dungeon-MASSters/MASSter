@@ -5,6 +5,9 @@ import { RecordModel } from "pocketbase";
 import { useQuery } from "react-query";
 import imgPlaceholder from "/src/assets/img/img-placeholder.webp";
 import { IconLoader3 } from "@tabler/icons-react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export function GridPage() {
     const listQuery = useQuery(
@@ -21,14 +24,19 @@ export function GridPage() {
         return <FullscreenLoader />;
     }
 
-    console.log(listQuery.data?.items);
-
     if (listQuery.data) {
         if (listQuery.data.items.length != 0) {
             const gridItems = [];
             for (const item of listQuery.data?.items ?? []) {
                 gridItems.push(
-                    <GridCard item={item} key={item.id}></GridCard>
+                    <Dialog key={item.id}>
+                        <DialogTrigger disabled={item.status != "generated"}>
+                            <GridCard item={item}></GridCard>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <ModalResultWindow item={item}></ModalResultWindow>
+                        </DialogContent>
+                    </Dialog>
                 )
             }
             return <div className="grid grid-cols-4 gap-2">{gridItems}</div>;
@@ -56,18 +64,53 @@ function GridCard({item}: {item: RecordModel}) {
 
     let elem = <IconLoader3 className="animate-spin"></IconLoader3>;
     if (fileQuery.isSuccess && item.status == "generated") {
-        elem = <img className="rounded-lg h-52 w-full object-cover"
+        elem = <img className="rounded-lg h-full w-full object-cover"
             src={fileQuery.data.length == 0 ? imgPlaceholder : fileQuery.data}></img>
     };
 
     return (
-        <Card className="w-full relative">
+        <Card className="w-full relative h-52">
             {coverMsg}
-            <CardContent className="p-0">{elem}</CardContent>
+            <CardContent className="p-0 h-full">{elem}</CardContent>
             <CardFooter className="rounded-lg flex w-full justify-between
                 absolute bottom-0 bg-gradient-to-b from-transparent to-black pt-8">
                 <CardTitle className="text-white">Image</CardTitle>
                 <CardDescription className="text-gray-300">{item.created}</CardDescription>
+            </CardFooter>
+        </Card>
+    );
+}
+
+function ModalResultWindow({item}: {item: RecordModel}) {
+    const [currentFileIndex, setCurrentFileIndex] = useState(0);
+
+    const fileQuery = useQuery(
+        [`get-file-${item.id}-${currentFileIndex}`],
+        () => {
+            return pb.files.getUrl(item, item.output_image[currentFileIndex]);
+        }
+    );
+
+    let elem = <IconLoader3 className="animate-spin"></IconLoader3>;
+    if (fileQuery.isSuccess && fileQuery.data.length != 0) {
+        elem =  <img className="h-full w-full object-contain"
+            src={fileQuery.data}></img>
+    };
+
+    return (
+        <Card className="w-full">
+            <CardContent className="h-full">{elem}</CardContent>
+            <CardFooter>
+                <Button
+                    disabled={currentFileIndex == 0}
+                    onClick={() => { setCurrentFileIndex(currentFileIndex - 1) }}>
+                    Previous
+                </Button>
+                <Button
+                    disabled={currentFileIndex == item.num_images - 1 }
+                    onClick={() => { setCurrentFileIndex(currentFileIndex + 1) }}>
+                    Next
+                </Button>
             </CardFooter>
         </Card>
     );
