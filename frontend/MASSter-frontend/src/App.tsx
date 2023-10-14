@@ -136,7 +136,7 @@ function App() {
                     {(params) => <EditorPage fileUrlB64={params.file_url} />}
                 </Route>
                 <Route>
-                    <Redirect to="/generate" />
+                    <Redirect to="/grid" />
                 </Route>
             </Switch>
         </div>
