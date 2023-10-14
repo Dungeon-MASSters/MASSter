@@ -1,5 +1,5 @@
 import { FullscreenLoader } from "@/components/loaders";
-import { Card, CardTitle, CardFooter, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardTitle, CardFooter, CardDescription, CardContent, CardHeader } from "@/components/ui/card";
 import { pb } from "@/lib/pb-client";
 import { RecordModel } from "pocketbase";
 import { useQuery } from "react-query";
@@ -19,6 +19,9 @@ export function GridPage() {
             refetchInterval: 10000 // обновлять каждые 10 сек
         }
     );
+    
+    const [open, setOpen] = useState(false);
+    const [currentItem, setCurrentItem] = useState<RecordModel>();
 
     if (listQuery.isLoading) {
         return <FullscreenLoader />;
@@ -27,19 +30,29 @@ export function GridPage() {
     if (listQuery.data) {
         if (listQuery.data.items.length != 0) {
             const gridItems = [];
-            for (const item of listQuery.data?.items ?? []) {
+            for (const item of listQuery.data.items ?? []) {
                 gridItems.push(
-                    <Dialog key={item.id}>
-                        <DialogTrigger disabled={item.status != "generated"}>
-                            <GridCard item={item}></GridCard>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
-                            <ModalResultWindow item={item}></ModalResultWindow>
-                        </DialogContent>
-                    </Dialog>
+                    <DialogTrigger
+                        key={item.id}
+                        disabled={item.status != "generated"}
+                        onClick={(e) => {
+                            setCurrentItem(item);
+                            setOpen(true);
+                        }}>
+                        <GridCard item={item}></GridCard>
+                    </DialogTrigger>
                 )
             }
-            return <div className="grid grid-cols-4 gap-2">{gridItems}</div>;
+            return (
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <div className="grid grid-cols-4 gap-2">{gridItems}</div>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <ModalResultWindow
+                            item={currentItem ?? listQuery.data.items[0]}
+                            openChange={setOpen}></ModalResultWindow>
+                    </DialogContent>
+                </Dialog>
+            );
         } else {
             return <div>No items!</div>
         }
@@ -81,8 +94,14 @@ function GridCard({item}: {item: RecordModel}) {
     );
 }
 
-function ModalResultWindow({item}: {item: RecordModel}) {
+type ModalResWindowProps = {
+    item: RecordModel,
+    openChange: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+function ModalResultWindow({item, openChange}: ModalResWindowProps) {
     const [currentFileIndex, setCurrentFileIndex] = useState(0);
+    // const [open, setOpen] = openState;
 
     const fileQuery = useQuery(
         [`get-file-${item.id}-${currentFileIndex}`],
@@ -98,9 +117,9 @@ function ModalResultWindow({item}: {item: RecordModel}) {
     };
 
     return (
-        <Card className="w-full">
-            <CardContent className="h-full">{elem}</CardContent>
-            <CardFooter>
+        <div className="flex">
+            <div>
+                {elem}
                 <Button
                     disabled={currentFileIndex == 0}
                     onClick={() => { setCurrentFileIndex(currentFileIndex - 1) }}>
@@ -111,7 +130,18 @@ function ModalResultWindow({item}: {item: RecordModel}) {
                     onClick={() => { setCurrentFileIndex(currentFileIndex + 1) }}>
                     Next
                 </Button>
-            </CardFooter>
-        </Card>
+            </div>
+            <Card className="w-full">
+                <CardHeader>Image</CardHeader>
+                <CardContent className="h-full">
+                    <Button
+                        onClick={(e) => {
+                            pb.collection('text_generation_mvp')
+                                .update(item.id, { status: "open" })
+                                .then(_ => openChange(false));
+                        }}>Перегенерировать</Button>
+                </CardContent>
+            </Card>
+        </div>
     );
 }

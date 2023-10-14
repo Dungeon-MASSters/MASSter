@@ -51,7 +51,7 @@ function App() {
 
     return (
         <div className="container">
-            <NavigationMenu className="mx-auto">
+            <NavigationMenu className="mx-auto mb-4 border-b-2 border-gray-200">
                 <NavigationMenuList className="justify-between flex">
                     <NavigationMenuItem
                         className={clsx(navigationMenuTriggerStyle())}
