@@ -59,6 +59,8 @@ class ImageGenerationModel:
         except:
             try:
                 del self.pipe
+                del self.pipe_prior
+                del self.depth_estimator
             except:
                 ...
 
@@ -157,11 +159,7 @@ class ImageGenerationModel:
                 +'low quality, jpeg artifacts, ugly, duplicate, '
                 + 'morbid, mutilated, out of frame, extra fingers, '
                 + 'mutated hands, poorly drawn hands, poorly drawn face, '
-                + 'mutation, deformed, blurry, dehydrated, bad anatomy, '
-                + 'bad proportions, extra limbs, cloned face, disfigured, '
-                + 'gross proportions, malformed limbs, missing arms, '
-                + 'missing legs, extra arms, extra legs, fused fingers, '
-                + 'too many fingers, long neck, username, watermark, signature'
+                + 'mutation, deformed, blurry, dehydrated, bad anatomy'
             )
             
         if num_steps < 1: num_steps = 1
@@ -184,7 +182,6 @@ class ImageGenerationModel:
 
             images = self.pipe(
                 image_embeds=image_emb,
-                guidance_scale=guidance_scale,
                 negative_image_embeds=zero_image_emb,
                 hint=hint,
                 num_inference_steps=num_steps,
