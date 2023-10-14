@@ -3,7 +3,6 @@ import { AuthPage } from "./pages/auth";
 import { invalidateUser, logoutUser, useUser } from "./lib/use-user";
 import { useQueryClient } from "react-query";
 import { FullscreenLoader } from "./components/loaders";
-import { MainPage } from "./pages/main";
 import { GridPage } from "./pages/grid";
 import { AddPromptPage } from "./pages/add-prompt";
 import {
