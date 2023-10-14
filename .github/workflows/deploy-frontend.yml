@@ -19,6 +19,7 @@ jobs:
       with:
         node-version: 18
         cache: 'npm'
+        cache-dependency-path: frontend/MASSter-frontend/package-lock.json
     - run: npm ci
       working-directory: frontend/MASSter-frontend
     - run: npm run build
