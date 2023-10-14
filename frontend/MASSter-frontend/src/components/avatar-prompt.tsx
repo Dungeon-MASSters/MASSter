@@ -209,7 +209,7 @@ export function AvatarAdvancedPromptForm({
         }
         formData.append("style", data.style);
         formData.append("status", "open");
-        formData.append("type", "banner");
+        formData.append("type", "avatar");
         formData.append("num_images", `${data.numImages}`);
 
         if (data.inputImage) {
