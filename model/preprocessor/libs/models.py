@@ -84,7 +84,7 @@ class VideoParser:
         frame_count = int(video_clip.duration / 60 * 5)
         if frame_count < 50:
             frame_count = int(video_clip.duration * 0.7)
-        else if frame_count > 200:
+        elif frame_count > 200:
             frame_count = int(video_clip.duration * 0.7)
             
         # перебираем каждый возможный кадр

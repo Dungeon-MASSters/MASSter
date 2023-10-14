@@ -17,7 +17,7 @@ class Pipeline:
             "dev@email.local", 
             "6c6297287af76472")
         
-        #self.translator = Translator()
+        self.translator = Translator()
         self.vparser = VideoParser()
 
     def run(self):
@@ -52,18 +52,21 @@ class Pipeline:
                 except:
                     style = records.items[0].style
 
-                video_url = self.pb.collection('text_generation_mvp').get_file_url(records.items[0], filename=records.items[0].video)
+                try:
+                    video_url = self.pb.collection('text_generation_mvp').get_file_url(records.items[0], filename=records.items[0].video)
+                    
+                    video_name = 'video.mp4' 
+                    urllib.request.urlretrieve(video_url, video_name)
                 
-                video_name = 'video.mp4'
-                urllib.request.urlretrieve(video_url, video_name)
-                
-                summary = self.vparser.get_desc_from_video(video_name)[0]['summary_text']
-                print(summary)
+                    summary = self.vparser.get_desc_from_video(video_name)[0]['summary_text']
+                    print(summary)
 
-                if prompt != '':
-                    prompt = summary + ', ' + prompt
-                else:
-                    prompt = summary
+                    if prompt != '':
+                        prompt = summary + ', ' + prompt
+                    else:
+                        prompt = summary
+                except:
+                    logger.info('Нет приложенного видео')
 
                 self.pb.collection('text_generation_mvp').update(
                     id=records.items[0].id,
