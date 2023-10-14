@@ -55,7 +55,7 @@ class Pipeline:
                     style = records.items[0].style
 
                 try:
-                    video_url = self.pb.collection(settings.COL_NAME).get_file_url(records.items[0], filename=records.items[0].video)
+                    url = self.pb.collection(settings.COL_NAME).get_file_url(records.items[0], filename=records.items[0].video)
                     
                     s = re.findall('\[(.*)\]', url)
                     ss = re.sub('[\' ]', '', s[0])
@@ -66,7 +66,7 @@ class Pipeline:
                     #video_name = 'video.mp4' 
 
                     for video_name in video_names:
-                        urllib.request.urlretrieve(video_url + video_name, video_name)
+                        urllib.request.urlretrieve(url + video_name, video_name)
 
 
                     summary = self.vparser.get_desc_from_video(video_names)[0]['summary_text']

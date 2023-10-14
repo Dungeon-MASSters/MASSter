@@ -86,7 +86,7 @@ class VideoParser:
         if frame_count < 50:
             frame_count = int(video_clip.duration * 0.7)
         elif frame_count > 200:
-            frame_count = int(video_clip.duration * 0.7)
+            frame_count = 200
             
         # перебираем каждый возможный кадр
         for i in range(frame_count):
@@ -105,7 +105,7 @@ class VideoParser:
         result_summary = []
         for video_file in video_files:
             if not video_file.endswith('.mp4'):
-                return ''
+                continue
 
             folder_dir = self.video_parser(video_file)
             desc = []
