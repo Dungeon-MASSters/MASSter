@@ -48,7 +48,7 @@ export function AddPromptPage() {
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="video-cover">Обложка видео</TabsTrigger>
                     <TabsTrigger value="banner">Баннер канала</TabsTrigger>
-                    <TabsTrigger value="avatar">Автарка канала</TabsTrigger>
+                    <TabsTrigger value="avatar">Авaтарка канала</TabsTrigger>
                 </TabsList>
                 <TabsContent value="video-cover">
                     {advancedMode ? (
