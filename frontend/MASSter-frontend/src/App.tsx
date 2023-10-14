@@ -1,18 +1,32 @@
-import { Link, Redirect, Route,  Switch } from "wouter";
+import { Link, Redirect, Route, Switch } from "wouter";
 import { AuthPage } from "./pages/auth";
 import { invalidateUser, logoutUser, useUser } from "./lib/use-user";
-import { Button } from "./components/ui/button";
 import { useQueryClient } from "react-query";
 import { FullscreenLoader } from "./components/loaders";
 import { MainPage } from "./pages/main";
 import { GridPage } from "./pages/grid";
 import { AddPromptPage } from "./pages/add-prompt";
+import {
+    NavigationMenu,
+    NavigationMenuItem,
+    NavigationMenuLink,
+    NavigationMenuList,
+    navigationMenuTriggerStyle
+} from "./components/ui/navigation-menu";
+import {
+    IconBrush,
+    IconLogout,
+    IconPhoto,
+    IconUser
+} from "@tabler/icons-react";
+import clsx from "clsx";
 
 function App() {
     const {
         isSuccess: isAuthed,
         refetch: refetchUser,
-        isLoading
+        isLoading,
+        data: user
     } = useUser(false);
     const qc = useQueryClient();
 
@@ -37,36 +51,54 @@ function App() {
 
     return (
         <div className="container">
-            {/* TODO: nav menu from shadcn */}
-            <div className="flex gap-2 items-center">
-                <Link
-                    href="some page"
-                    className="bg-primary p-2 rounded text-input"
-                >
-                    Some page
-                </Link>
-                <Link
-                    href="/grid"
-                    className="bg-primary p-2 rounded text-input"
-                >
-                    Grid
-                </Link>
-                <Link
-                    href="/generate"
-                    className="bg-primary p-2 rounded text-input"
-                >
-                    Add
-                </Link>
-                <Button
-                    onClick={() => {
-                        console.log("logout");
-                        logoutUser();
-                        invalidateUser(qc).then(() => refetchUser());
-                    }}
-                >
-                    Logout
-                </Button>
-            </div>
+            <NavigationMenu className="mx-auto">
+                <NavigationMenuList className="justify-between flex">
+                    <NavigationMenuItem
+                        className={clsx(navigationMenuTriggerStyle())}
+                    >
+                        <Link href="/grid">
+                            <NavigationMenuLink className="flex gap-1">
+                                <IconPhoto />
+                                <span>результаты генерации</span>
+                            </NavigationMenuLink>
+                        </Link>
+                    </NavigationMenuItem>
+                    <NavigationMenuItem
+                        className={clsx(navigationMenuTriggerStyle())}
+                    >
+                        <Link href="/generate">
+                            <NavigationMenuLink className="flex gap-1">
+                                <IconBrush />
+                                <span>создать дизайн</span>
+                            </NavigationMenuLink>
+                        </Link>
+                    </NavigationMenuItem>
+                    <NavigationMenuItem
+                        className={clsx(navigationMenuTriggerStyle())}
+                    >
+                        <NavigationMenuLink className="flex gap-1">
+                            <IconUser />
+                            <span>{user.record["username"]}</span>
+                        </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem
+                        className={clsx(navigationMenuTriggerStyle())}
+                    >
+                        <NavigationMenuLink
+                            className="flex gap-1"
+                            onClick={() => {
+                                console.log("logout");
+                                logoutUser();
+                                invalidateUser(qc).then(() => refetchUser());
+                            }}
+                        >
+                            <IconLogout />
+                            <span>выйти</span>
+                        </NavigationMenuLink>
+                    </NavigationMenuItem>
+                </NavigationMenuList>
+            </NavigationMenu>
 
             <Switch>
                 <Route path="/" component={MainPage} />
