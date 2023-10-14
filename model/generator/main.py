@@ -90,13 +90,13 @@ class Pipeline:
     def process_generation(self, data, width, height) -> list[Image.Image]:
         # self.pb.get_file_url(data, filename=f'tmp/{data.record.image}')
 
-        if data.input_image != '':
+        if data.input_image != '' and data.type == 'avatar':
             try:
                 image_url = self.pb.collection('text_generation_mvp').get_file_url(data, filename=data.input_image) 
                 urllib.request.urlretrieve(image_url, data.input_image)
 
                 reference_image = Image.open(data.input_image, mode='r')
-                reference_image = reference_image.resize(size=(width, height))
+                reference_image = reference_image.resize(size=(768, 768))
                 reference_image.save(data.input_image)
 
                 self.model.remove_models()
@@ -105,8 +105,8 @@ class Pipeline:
                     image_path=data.input_image,
                     num_steps=50,
                     guidance_scale=4.0,
-                    height=height,
-                    width=width,
+                    height=768,
+                    width=768,
                     prompt=data.prompt,
                     style=data.style,
                     negative_prompt=data.negative_prompt,
@@ -114,6 +114,9 @@ class Pipeline:
                 )
                 self.model.remove_depth_model()
                 self.model.load_kandinsky()
+
+                for image in images:
+                    image = image.resize(size=(800, 800))
 
                 return images
             except:
