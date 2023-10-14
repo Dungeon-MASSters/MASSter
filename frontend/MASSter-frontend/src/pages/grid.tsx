@@ -14,12 +14,45 @@ import { IconLoader3 } from "@tabler/icons-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLocation } from "wouter";
+
+enum ImgType {
+    banner = 'banner',
+    video = 'video',
+    avatar = 'avatar'
+}
 
 export function GridPage() {
+    const [imgType, setImgType] = useState(ImgType.video);
+
+    return (
+        <div>
+            <div className="py-4 w-full flex justify-center">
+                <Tabs
+                    defaultValue={ImgType.video} className="w-1/2"
+                    onValueChange={(e) => {
+                        setImgType(ImgType[e as keyof typeof ImgType] ?? ImgType.video)
+                    }}>
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value={ImgType.video}>Обложки</TabsTrigger>
+                        <TabsTrigger value={ImgType.avatar}>Аватары</TabsTrigger>
+                        <TabsTrigger value={ImgType.banner}>Баннеры</TabsTrigger>
+                    </TabsList>
+                </Tabs>
+            </div>
+            <ImageGrid imgType={imgType}></ImageGrid>
+        </div>
+    )
+}
+
+function ImageGrid({imgType}: {imgType: ImgType}) {
     const listQuery = useQuery(
-        ["get-gen-list"],
+        [`get-gen-list-${imgType}`],
         () => {
-            return pb.collection("text_generation_mvp").getList();
+            return pb.collection("text_generation_mvp").getFullList({
+                filter: `type = "${imgType}"`
+            });
         },
         {
             refetchInterval: 10000 // обновлять каждые 10 сек
@@ -33,10 +66,13 @@ export function GridPage() {
         return <FullscreenLoader />;
     }
 
+    let grid = <FullscreenLoader />;
+
     if (listQuery.data) {
-        if (listQuery.data.items.length != 0) {
+        if (listQuery.data.length != 0) {
+            const canEdit = imgType == ImgType.video;
             const gridItems = [];
-            for (const item of listQuery.data.items ?? []) {
+            for (const item of listQuery.data ?? []) {
                 gridItems.push(
                     <DialogTrigger
                         key={item.id}
@@ -50,25 +86,28 @@ export function GridPage() {
                     </DialogTrigger>
                 );
             }
-            return (
+            grid = (
                 <Dialog open={open} onOpenChange={setOpen}>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                         {gridItems}
                     </div>
                     <DialogContent className="w-3/4 h-3/4">
                         <ModalResultWindow
-                            item={currentItem ?? listQuery.data.items[0]}
+                            item={currentItem ?? listQuery.data[0]}
+                            canEdit={canEdit}
                             openChange={setOpen}
                         ></ModalResultWindow>
                     </DialogContent>
                 </Dialog>
             );
         } else {
-            return <div>No items!</div>;
+            grid = <div>No items!</div>;
         }
     } else {
-        return <div>Error</div>;
+        grid = <div>Error</div>;
     }
+
+    return grid;
 }
 
 function GridCard({ item }: { item: RecordModel }) {
@@ -119,11 +158,13 @@ function GridCard({ item }: { item: RecordModel }) {
 
 type ModalResWindowProps = {
     item: RecordModel;
+    canEdit: boolean;
     openChange: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function ModalResultWindow({ item, openChange }: ModalResWindowProps) {
+function ModalResultWindow({ item, canEdit, openChange }: ModalResWindowProps) {
     const [currentFileIndex, setCurrentFileIndex] = useState(0);
+    const [_, navigate] = useLocation();
 
     const fileQuery = useQuery(
         [`get-file-${item.id}-${currentFileIndex}`],
@@ -159,13 +200,17 @@ function ModalResultWindow({ item, openChange }: ModalResWindowProps) {
             </div>
             <div className="w-1/3 h-full p-6 border-l-2 border-gray-200">
                 <div className="text-2xl mb-4">Image</div>
-                <div className="flex h-full flex-col align-middle">
+                <div className="flex h-full flex-col align-middle gap-2">
                     <Button
                         onClick={() => {
                             pb.collection("text_generation_mvp")
                                 .update(item.id, { status: "open" })
                                 .then(_ => openChange(false));
                         }}>Перегенерировать</Button>
+                    {canEdit
+                        ? <Button onClick={() => {
+                            navigate('/editor')}}>Изменить картинку</Button>
+                        : undefined}
                 </div>
             </div>
         </div>

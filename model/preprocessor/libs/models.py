@@ -1,7 +1,7 @@
 import argostranslate.package
 import argostranslate.translate
 
-from libs import logger
+# from libs import logger
 
 from moviepy.editor import VideoFileClip
 import numpy as np
@@ -43,7 +43,7 @@ class VideoParser:
     def __init__(self):
         self.DEVICE = torch.device('cuda:0')
         self.processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-large")
-        self.model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-large")
+        self.model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-large").to(self.DEVICE)
 
         self.summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device = self.DEVICE)
 
@@ -52,11 +52,10 @@ class VideoParser:
         raw_image = Image.open(filename).convert('RGB')
 
         # conditional image captioning
-        inputs = self.processor(raw_image, return_tensors="pt")
+        inputs = self.processor(raw_image, return_tensors="pt").to(self.DEVICE)
 
         out = self.model.generate(**inputs)
         return self.processor.decode(out[0], skip_special_tokens=True)
-
 
     def format_timedelta(self, td):
         """Служебная функция для классного форматирования объектов timedelta (например, 00: 00: 20.05)
@@ -94,8 +93,9 @@ class VideoParser:
             video_clip.save_frame(frame_filename, current_duration)
         return folder_dir
 
-
-    def get_desc_from_video(self, video_file) -> list:
+    def get_desc_from_video(self, video_file: str) -> str:
+        if not video_file.endswith('.mp4'):
+            return ''
 
         folder_dir = self.video_parser(video_file)
         desc = []
@@ -113,3 +113,4 @@ class VideoParser:
         article = ''.join(str(x) for x in desc)
         
         return self.summarizer(article, max_length=130, min_length=30, do_sample=False)
+    
