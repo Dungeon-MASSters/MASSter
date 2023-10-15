@@ -85,8 +85,8 @@ class VideoParser:
         frame_count = int(video_clip.duration / 60 * 5)
         if frame_count < 50:
             frame_count = int(video_clip.duration * 0.7)
-        elif frame_count > 200:
-            frame_count = 200
+        elif frame_count > 100:
+            frame_count = 100
             
         # перебираем каждый возможный кадр
         for i in range(frame_count):
@@ -119,7 +119,7 @@ class VideoParser:
             result_summary.append(summary_desc)
 
         if len(result_summary) > 1:
-            return self.get_summary(result_summary)
+            return self.get_summary([x[0]['summary_text'] for x in result_summary])
         elif len(result_summary) == 1:
             return result_summary[0]
         else:
