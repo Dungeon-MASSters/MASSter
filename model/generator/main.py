@@ -40,11 +40,11 @@ class Pipeline:
                     width = 1280
                     height = 720
                 elif records.items[0].type == 'banner':
-                    width = 2204
-                    height = 864
+                    width = 1102#2204
+                    height = 432#864
                 else:    
-                    width = 800
-                    height = 800
+                    width = 600#800
+                    height = 600#800
 
                 images = self.process_generation(records.items[0], width=width, height=height)
                 if len(images) == 0:
