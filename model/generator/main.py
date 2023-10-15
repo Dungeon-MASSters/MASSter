@@ -99,7 +99,7 @@ class Pipeline:
                 # self.model.load_depth_model()
                 images = self.model.generate_based_on_image(
                     image_path=data.input_image,
-                    num_steps=200,
+                    num_steps=100,
                     guidance_scale=4.0,
                     height=768,
                     width=768,
@@ -119,7 +119,7 @@ class Pipeline:
                 logger.error('Ошибка при скачивании референса, генерирую без референса')
 
         images = self.model.generate(
-            num_steps=200,
+            num_steps=100,
             guidance_scale=4.0,
             height=height,
             width=width,
