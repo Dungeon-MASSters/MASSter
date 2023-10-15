@@ -8,7 +8,16 @@ import samPic from "../assets/img/maxresdefault.jpg";
 import { isMobile } from "react-device-detect";
 
 function authWithVK() {
-    return pb.collection("users").authWithOAuth2({ provider: "vk" });
+    return pb.collection("users").authWithOAuth2({
+        provider: "vk",
+        urlCallback: (url) => {
+            if (isMobile) {
+                window.location.href = url;
+            } else {
+                window.open(url, "_blank", "");
+            }
+        }
+    });
 }
 
 function authWithYandex() {
