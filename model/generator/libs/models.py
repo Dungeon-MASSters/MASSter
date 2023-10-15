@@ -115,7 +115,7 @@ class ImageGenerationModel:
 
         try:
             img_emb = self.prior(
-                prompt=prompt,
+                prompt=prompt + ', 4k',
                 num_inference_steps=num_steps,
                 num_images_per_prompt=num_images
             )
