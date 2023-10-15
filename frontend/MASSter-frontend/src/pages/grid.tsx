@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { pb } from "@/lib/pb-client";
 import { RecordModel } from "pocketbase";
-import { useQuery } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import imgPlaceholder from "/src/assets/img/img-placeholder.webp";
 import { IconBrush, IconLoader3, IconPlus } from "@tabler/icons-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -56,14 +56,18 @@ export function GridPage() {
                 className="h-fit fixed bottom-12 right-12 shadow-md shadow-white aspect-square rounded-full"
                 onClick={() => {
                     navigate(`/generate`);
-                }}>
-                <IconPlus size={28}></IconPlus><IconBrush size={48}></IconBrush>
+                }}
+            >
+                <IconPlus size={28}></IconPlus>
+                <IconBrush size={48}></IconBrush>
             </Button>
         </div>
     );
 }
 
 function ImageGrid({ imgType }: { imgType: ImgType }) {
+    const qc = useQueryClient();
+
     const listQuery = useQuery(
         [`get-gen-list-${imgType}`],
         () => {
@@ -112,25 +116,42 @@ function ImageGrid({ imgType }: { imgType: ImgType }) {
                         <ModalResultWindow
                             item={currentItem ?? listQuery.data[0]}
                             canEdit={true}
-                            openChange={setOpen}
+                            openChange={(opened) => {
+                                qc.invalidateQueries([
+                                    `get-gen-list-${imgType}`
+                                ]);
+                                setOpen(opened);
+                            }}
                         ></ModalResultWindow>
                     </DialogContent>
                 </Dialog>
             );
         } else {
-            grid = <div className="text-gray-600 text-lg">
-                <p>
-                    <span className="inline-block mb-2 font-semibold">Нет изображений в данной категории!</span><br/>
-                    Вот, что с этим можно сделать:
-                </p>
-                <ul>
-                    <li>• Нажмите кнопку в правом нижнем углу страницы, чтобы сгенерировать изображение...</li>
-                    <li>• ... или же выберите нужный раздел вверху!</li>
-                </ul>
-            </div>;
+            grid = (
+                <div className="text-gray-600 text-lg">
+                    <p>
+                        <span className="inline-block mb-2 font-semibold">
+                            Нет изображений в данной категории!
+                        </span>
+                        <br />
+                        Вот, что с этим можно сделать:
+                    </p>
+                    <ul>
+                        <li>
+                            • Нажмите кнопку в правом нижнем углу страницы,
+                            чтобы сгенерировать изображение...
+                        </li>
+                        <li>• ... или же выберите нужный раздел вверху!</li>
+                    </ul>
+                </div>
+            );
         }
     } else {
-        grid = <div className="text-gray-600 text-lg">Произошла какая-то ошибка. Мы уже над ней работаем!</div>;
+        grid = (
+            <div className="text-gray-600 text-lg">
+                Произошла какая-то ошибка. Мы уже над ней работаем!
+            </div>
+        );
     }
 
     return grid;
@@ -185,7 +206,7 @@ function GridCard({ item }: { item: RecordModel }) {
 type ModalResWindowProps = {
     item: RecordModel;
     canEdit: boolean;
-    openChange: React.Dispatch<React.SetStateAction<boolean>>;
+    openChange: (opened: boolean) => void;
 };
 
 function ModalResultWindow({ item, canEdit, openChange }: ModalResWindowProps) {
@@ -259,18 +280,27 @@ function ModalResultWindow({ item, canEdit, openChange }: ModalResWindowProps) {
                         <Button
                             onClick={() => {
                                 fetch(fileQuery.data, {
-                                    method: 'GET',
+                                    method: "GET",
                                     headers: {
-                                        'Content-Type': `image/${getExtension(fileQuery.data)}`,
-                                    },
-                                }).then((response) => response.blob())
+                                        "Content-Type": `image/${getExtension(
+                                            fileQuery.data
+                                        )}`
+                                    }
+                                })
+                                    .then((response) => response.blob())
                                     .then((blob) => {
                                         const url = URL.createObjectURL(
-                                            new Blob([blob]),
+                                            new Blob([blob])
                                         );
-                                        const link = document.createElement('a');
+                                        const link =
+                                            document.createElement("a");
                                         link.href = url;
-                                        link.setAttribute('download', `${item.id}.${getExtension(fileQuery.data)}`);
+                                        link.setAttribute(
+                                            "download",
+                                            `${item.id}.${getExtension(
+                                                fileQuery.data
+                                            )}`
+                                        );
                                         document.body.appendChild(link);
                                         link.click();
                                         link.parentNode?.removeChild(link);
@@ -281,7 +311,8 @@ function ModalResultWindow({ item, canEdit, openChange }: ModalResWindowProps) {
                             Скачать
                         </Button>
                     ) : undefined}
-                    <Button variant={'destructive'}
+                    <Button
+                        variant={"destructive"}
                         onClick={() => {
                             pb.collection("text_generation_mvp")
                                 .delete(item.id)
