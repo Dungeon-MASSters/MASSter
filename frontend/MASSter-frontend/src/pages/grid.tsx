@@ -16,6 +16,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocation } from "wouter";
+import { getExtension } from "@/lib/utils";
 
 enum ImgType {
     banner = "banner",
@@ -254,6 +255,41 @@ function ModalResultWindow({ item, canEdit, openChange }: ModalResWindowProps) {
                             Редактировать
                         </Button>
                     ) : undefined}
+                    {canEdit && fileQuery.data ? (
+                        <Button
+                            onClick={() => {
+                                fetch(fileQuery.data, {
+                                    method: 'GET',
+                                    headers: {
+                                        'Content-Type': `image/${getExtension(fileQuery.data)}`,
+                                    },
+                                }).then((response) => response.blob())
+                                    .then((blob) => {
+                                        const url = URL.createObjectURL(
+                                            new Blob([blob]),
+                                        );
+                                        const link = document.createElement('a');
+                                        link.href = url;
+                                        link.setAttribute('download', `${item.id}.${getExtension(fileQuery.data)}`);
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        link.parentNode?.removeChild(link);
+                                        URL.revokeObjectURL(url);
+                                    });
+                            }}
+                        >
+                            Скачать
+                        </Button>
+                    ) : undefined}
+                    <Button variant={'destructive'}
+                        onClick={() => {
+                            pb.collection("text_generation_mvp")
+                                .delete(item.id)
+                                .then((_) => openChange(false));
+                        }}
+                    >
+                        Удалить
+                    </Button>
                 </div>
             </div>
         </div>
