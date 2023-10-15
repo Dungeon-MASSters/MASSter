@@ -11,8 +11,10 @@ function authWithVK() {
     return pb.collection("users").authWithOAuth2({
         provider: "vk",
         urlCallback: (url) => {
-            if (isMobile) {
-                window.location.href = url;
+            let w = window.open()
+
+            if (isMobile && w != null) {
+                w.location.href = url;
             } else {
                 window.open(url, "_blank", "");
             }
@@ -24,8 +26,10 @@ function authWithYandex() {
     return pb.collection("users").authWithOAuth2({
         provider: "yandex",
         urlCallback: (url) => {
-            if (isMobile) {
-                window.location.href = url;
+            let w = window.open()
+
+            if (isMobile && w != null) {
+                w.location.href = url;
             } else {
                 window.open(url, "_blank", "");
             }
