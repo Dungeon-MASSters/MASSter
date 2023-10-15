@@ -25,22 +25,40 @@ services:
 
     command: ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "8080"]
 
-  # preprocessor:
-  #   build:
-  #     context: model/preprocessor/docker
-  #
-  #   environment:
-  #     - PB_LINK=http://pocketbase:8090/
-  #     - PB_LOGIN=dev@email.local
-  #     - PB_PWD=1234567890
-  #     - COL_NAME=text_generation_mvp
-  #
-  # generator:
-  #   build:
-  #     context: model/generator/docker
-  #
-  #   environment:
-  #     - PB_LINK=http://pocketbase:8090/
-  #     - PB_LOGIN=dev@email.local
-  #     - PB_PWD=1234567890
-  #     - COL_NAME=text_generation_mvp
+  preprocessor:
+    build:
+      context: model/generator/
+      dockerfile: docker/Dockerfile
+
+    environment:
+      - PB_LINK=http://pocketbase:8090/
+      - PB_LOGIN=dev@email.local
+      - PB_PWD=1234567890
+      - COL_NAME=text_generation_mvp
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  generator:
+    build:
+      context: model/generator/
+      dockerfile: docker/Dockerfile
+
+    environment:
+      - PB_LINK=http://pocketbase:8090/
+      - PB_LOGIN=dev@email.local
+      - PB_PWD=1234567890
+      - COL_NAME=text_generation_mvp
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

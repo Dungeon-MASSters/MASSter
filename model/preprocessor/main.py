@@ -9,13 +9,15 @@ import pathlib
 from libs import logger
 from libs.models import Translator, VideoParser
 import urllib.request
+from libs.config import settings
+import re
 
 class Pipeline:
     def __init__(self) -> None:
-        self.pb: PocketBase = PocketBase("https://pb.apps.npod.space/")
+        self.pb: PocketBase = PocketBase(settings.PB_LINK)
         self.admin_data = self.pb.admins.auth_with_password(
-            "dev@email.local", 
-            "6c6297287af76472")
+            settings.PB_LOGIN, 
+            settings.PB_PWD)
         
         self.translator = Translator()
         self.vparser = VideoParser()
@@ -23,7 +25,7 @@ class Pipeline:
     def run(self):
         while True:
             try:
-                records = self.pb.collection('text_generation_mvp').get_list(
+                records = self.pb.collection(settings.COL_NAME).get_list(
                     page=1,
                     per_page=1,
                     query_params={
@@ -53,12 +55,21 @@ class Pipeline:
                     style = records.items[0].style
 
                 try:
-                    video_url = self.pb.collection('text_generation_mvp').get_file_url(records.items[0], filename=records.items[0].video)
+                    url = self.pb.collection(settings.COL_NAME).get_file_url(records.items[0], filename=records.items[0].video)
                     
-                    video_name = 'video.mp4' 
-                    urllib.request.urlretrieve(video_url, video_name)
-                
-                    summary = self.vparser.get_desc_from_video(video_name)[0]['summary_text']
+                    s = re.findall('\[(.*)\]', url)
+                    ss = re.sub('[\' ]', '', s[0])
+                    video_names = re.split(',', ss)
+
+                    url = re.sub('\[.*\]', '', url)
+
+                    #video_name = 'video.mp4' 
+
+                    for video_name in video_names:
+                        urllib.request.urlretrieve(url + video_name, video_name)
+
+
+                    summary = self.vparser.get_desc_from_video(video_names)[0]['summary_text']
                     print(summary)
 
                     if prompt != '':
@@ -68,7 +79,7 @@ class Pipeline:
                 except:
                     logger.info('Нет приложенного видео')
 
-                self.pb.collection('text_generation_mvp').update(
+                self.pb.collection(settings.COL_NAME).update(
                     id=records.items[0].id,
                     body_params={
                         "status": "preprocessed",

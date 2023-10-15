@@ -32,6 +32,28 @@ jobs:
         name: frontend-static
         path: frontend/MASSter-frontend/dist
 
+  build2:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js 18
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: 'npm'
+        cache-dependency-path: frontend/MASSter-frontend/package-lock.json
+    - run: npm ci
+      working-directory: frontend/MASSter-frontend
+    - run: cp .env.production.deploy2 .env.production
+      working-directory: frontend/MASSter-frontend
+    - run: npm run build
+      working-directory: frontend/MASSter-frontend
+    - name: Save build
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-static-2
+        path: frontend/MASSter-frontend/dist
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
@@ -50,5 +72,26 @@ jobs:
         ARGS: "-rltgoDzvO --delete"
         SOURCE: "build/"
         REMOTE_HOST: ${{ secrets.DEPLOY_HOST }}
+        REMOTE_USER: ${{ secrets.DEPLOY_USER }}
+        TARGET: ${{ secrets.DEPLOY_TARGET }}
+
+  deploy2:
+    runs-on: ubuntu-latest
+    needs: build2
+    steps:
+    - name: Get build
+      uses: actions/download-artifact@v3
+      with:
+        name: frontend-static-2
+        path: build
+    - name: List build
+      run: ls -la build
+    - name: Deploy to server
+      uses: easingthemes/ssh-deploy@main
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
+        ARGS: "-rltgoDzvO --delete"
+        SOURCE: "build/"
+        REMOTE_HOST: ${{ secrets.DEPLOY_HOST_2 }}
         REMOTE_USER: ${{ secrets.DEPLOY_USER }}
         TARGET: ${{ secrets.DEPLOY_TARGET }}

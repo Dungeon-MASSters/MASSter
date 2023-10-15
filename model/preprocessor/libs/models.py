@@ -14,6 +14,7 @@ from PIL import Image
 from transformers import BlipProcessor, BlipForConditionalGeneration, pipeline
 import torch
 import shutil
+from libs import logger
 
 class Translator:
     def __init__(self) -> None:
@@ -85,7 +86,7 @@ class VideoParser:
         if frame_count < 50:
             frame_count = int(video_clip.duration * 0.7)
         elif frame_count > 200:
-            frame_count = int(video_clip.duration * 0.7)
+            frame_count = 200
             
         # перебираем каждый возможный кадр
         for i in range(frame_count):
@@ -99,20 +100,30 @@ class VideoParser:
             video_clip.save_frame(frame_filename, current_duration)
         return folder_dir
 
-    def get_desc_from_video(self, video_file: str) -> str:
-        if not video_file.endswith('.mp4'):
+    def get_desc_from_video(self, video_files) -> str:
+
+        result_summary = []
+        for video_file in video_files:
+            if not video_file.endswith('.mp4'):
+                continue
+
+            folder_dir = self.video_parser(video_file)
+            desc = []
+            for images in os.listdir(folder_dir):
+                desc.append(self.generate_desc(folder_dir + '/' + images))
+
+            if os.path.exists(folder_dir):
+                shutil.rmtree(folder_dir)
+
+            summary_desc = self.get_summary(desc)
+            result_summary.append(summary_desc)
+
+        if len(result_summary) > 1:
+            return self.get_summary(result_summary)
+        elif len(result_summary) == 1:
+            return result_summary[0]
+        else:
             return ''
-
-        folder_dir = self.video_parser(video_file)
-        desc = []
-        for images in os.listdir(folder_dir):
-            desc.append(self.generate_desc(folder_dir + '/' + images))
-
-        if os.path.exists(folder_dir):
-            shutil.rmtree(folder_dir)
-
-        summary_desc = self.get_summary(desc)
-        return summary_desc
     
     def get_summary(self, desc) -> str:
 

@@ -1,7 +1,4 @@
-import {
-    ACCEPTED_VIDEO_TYPES,
-    STYLES
-} from "@/lib/consts";
+import { ACCEPTED_VIDEO_TYPES, STYLES } from "@/lib/consts";
 import { pb } from "@/lib/pb-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RecordAuthResponse, RecordModel } from "pocketbase";
@@ -178,15 +175,15 @@ export function BannerAdvancedPromptForm({
         //         "Пока мы поддерживаем только .png и .jpg изображения"
         //     )
         //     .optional(),
-        // video: z
-        //     .custom<File>((v) => v instanceof File, {
-        //         message: "Нужно загрузить видеоролик"
-        //     })
-        //     .refine(
-        //         (v) => ACCEPTED_VIDEO_TYPES.includes(v.type),
-        //         "Пока мы поддерживаем только .mp4 видеоролики :("
-        //     )
-        //     .optional(),
+        video: z
+            .custom<File>((v) => v instanceof File, {
+                message: "Нужно загрузить видеоролик"
+            })
+            .refine(
+                (v) => ACCEPTED_VIDEO_TYPES.includes(v.type),
+                "Пока мы поддерживаем только .mp4 видеоролики :("
+            )
+            .optional(),
         numImages: z.coerce.number().min(1).max(3)
     });
 
@@ -210,9 +207,9 @@ export function BannerAdvancedPromptForm({
         // if (data.inputImage) {
         //     formData.append("input_image", data.inputImage);
         // }
-        // if (data.video) {
-        //     formData.append("video", data.video);
-        // }
+        if (data.video) {
+            formData.append("video", data.video);
+        }
         return formData;
     };
 
@@ -326,6 +323,33 @@ export function BannerAdvancedPromptForm({
                                             </Select>
                                             <FormDescription>
                                                 Стиль для генерации баннера
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="video"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Видеоролик</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="file"
+                                                    accept="video/mp4"
+                                                    onBlur={field.onBlur}
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.files?.[0]
+                                                        )
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Видеоролик, на основе которого
+                                                будет сгенирован баннер
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
