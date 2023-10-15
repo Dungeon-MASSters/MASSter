@@ -37,14 +37,14 @@ class Pipeline:
                     continue
 
                 if records.items[0].type == 'video':
-                    width = 1280
-                    height = 720
+                    width = 1920
+                    height = 1080
                 elif records.items[0].type == 'banner':
-                    width = 1102#2204
-                    height = 432#864
+                    width = 2204
+                    height = 864
                 else:    
-                    width = 600#800
-                    height = 600#800
+                    width = 800
+                    height = 800
 
                 images = self.process_generation(records.items[0], width=width, height=height)
                 if len(images) == 0:
@@ -128,6 +128,9 @@ class Pipeline:
             negative_prompt=data.negative_prompt,
             num_images=data.num_images
         )
+
+        for image in images:
+            image = image.resize(size=(width, height))
 
         return images
 
