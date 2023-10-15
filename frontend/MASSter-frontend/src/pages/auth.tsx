@@ -4,14 +4,24 @@ import { pb } from "@/lib/pb-client";
 import { IconBrandVk, IconBrandYandex, IconLoader3 } from "@tabler/icons-react";
 import { RecordAuthResponse, RecordModel } from "pocketbase";
 import { useQuery } from "react-query";
-import samPic from '../assets/img/maxresdefault.jpg';
+import samPic from "../assets/img/maxresdefault.jpg";
+import { isMobile } from "react-device-detect";
 
 function authWithVK() {
     return pb.collection("users").authWithOAuth2({ provider: "vk" });
 }
 
 function authWithYandex() {
-    return pb.collection("users").authWithOAuth2({ provider: "yandex" });
+    return pb.collection("users").authWithOAuth2({
+        provider: "yandex",
+        urlCallback: (url) => {
+            if (isMobile) {
+                window.location.href = url;
+            } else {
+                window.open(url, "_blank", "");
+            }
+        }
+    });
 }
 
 type authPageProps = {
@@ -43,8 +53,12 @@ export function AuthPage({ onSuccess, onError }: authPageProps) {
                 <div className="absolute top-0 right-0 h-full w-full bg-gradient-to-b md:bg-gradient-to-r to-black from-transparent"></div>
                 <div className="absolute top-0 right-0 h-full w-full p-10">
                     <div className="h-full w-full flex justify-center items-center flex-col">
-                        <div className="text-white text-6xl text-center font-bold mb-5">Обложкер</div>
-                        <div className="text-gray-200 text-2xl text-center">Генерируйте арты к своим видео</div>
+                        <div className="text-white text-6xl text-center font-bold mb-5">
+                            Обложкер
+                        </div>
+                        <div className="text-gray-200 text-2xl text-center">
+                            Генерируйте арты к своим видео
+                        </div>
                     </div>
                 </div>
             </div>
@@ -52,7 +66,9 @@ export function AuthPage({ onSuccess, onError }: authPageProps) {
                 <div className="flex justify-center h-full px-4 items-center">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-center">Войти или зарегистрироваться</CardTitle>
+                            <CardTitle className="text-center">
+                                Войти или зарегистрироваться
+                            </CardTitle>
                         </CardHeader>
 
                         <CardContent className="gap-2 flex-col flex">
@@ -60,7 +76,8 @@ export function AuthPage({ onSuccess, onError }: authPageProps) {
                                 onClick={() => authVKQuery.refetch()}
                                 className="flex gap-1 w-full"
                                 disabled={
-                                    authVKQuery.isFetching || authYandexQuery.isFetching
+                                    authVKQuery.isFetching ||
+                                    authYandexQuery.isFetching
                                 }
                             >
                                 <span>Войти через</span>
@@ -76,7 +93,8 @@ export function AuthPage({ onSuccess, onError }: authPageProps) {
                                 onClick={() => authYandexQuery.refetch()}
                                 className="flex gap-1 w-full"
                                 disabled={
-                                    authVKQuery.isFetching || authYandexQuery.isFetching
+                                    authVKQuery.isFetching ||
+                                    authYandexQuery.isFetching
                                 }
                             >
                                 <span>Войти через</span>
