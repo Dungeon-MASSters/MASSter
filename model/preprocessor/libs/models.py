@@ -60,8 +60,8 @@ class Translator:
         #     return ''
         try:
             new_text = argostranslate.translate.translate(text, self.from_code, self.to_code)
-            if re.search(new_text, r'[A-Za-z]') is None:
-                return text
+            # if re.search(new_text, r'[A-Za-z]') is None:
+            #    return text
         except:
             logger.error(f'Ошибка при переводе текста: {text}')
             return text
