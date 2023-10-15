@@ -33,7 +33,7 @@ export function GridPage() {
             <div className="py-4 w-full flex justify-center">
                 <Tabs
                     defaultValue={ImgType.video}
-                    className="w-1/2"
+                    className="w-full md:w-1/2"
                     onValueChange={(e) => {
                         setImgType(
                             ImgType[e as keyof typeof ImgType] ?? ImgType.video
