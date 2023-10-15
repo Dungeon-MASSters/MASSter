@@ -15,7 +15,29 @@ from transformers import BlipProcessor, BlipForConditionalGeneration, pipeline
 import torch
 import shutil
 from libs import logger
-import censor.research
+
+# import opennsfw2 as n2
+# from rus_rule_based_insult_classifier.core import insult_classifier
+# from better_profanity import profanity
+
+# def check_nudity_one(image_path):
+#     nsfw_probability = n2.predict_image(image_path)
+#     if nsfw_probability > 0.75:
+#         return False
+#     return True
+
+# def check_nudity_lot(image_paths):
+#     result = []
+#     for image_path in image_paths:
+#         result.append(check_nudity_one(image_path))
+#     return result
+
+# #pip install git+https://github.com/kudep/rus_rule_based_insult_classifier
+# def check_profanity_ru(text):
+#     return insult_classifier(text)
+
+# def check_profanity_en(text):
+#     return profanity.contains_profanity(text)
 
 class Translator:
     def __init__(self) -> None:
@@ -33,8 +55,8 @@ class Translator:
 
     def translate(self, text: str) -> str:
         
-        if censor.research.check_profanity_ru(text):
-            return ''
+        # if check_profanity_ru(text):
+        #     return ''
         try:
             text = argostranslate.translate.translate(text, self.from_code, self.to_code)
         except:
@@ -42,7 +64,6 @@ class Translator:
 
         return text
     
-
 class VideoParser:
 
     def __init__(self):

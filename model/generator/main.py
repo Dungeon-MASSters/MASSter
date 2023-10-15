@@ -7,7 +7,6 @@ from libs import logger
 from libs.models import ImageGenerationModel
 import urllib.request
 from libs.config import settings
-import censor.research
 
 class Pipeline:
     def __init__(self) -> None:
@@ -85,17 +84,11 @@ class Pipeline:
                 )
 
             except:
-                raise
                 logger.error('Ошибка при чтении коллекции')
                 time.sleep(3)
 
     def process_generation(self, data, width, height) -> list[Image.Image]:
         # self.pb.get_file_url(data, filename=f'tmp/{data.record.image}')
-
-        if censor.research.check_profanity_ru(data.prompt):
-            data.prompt = ''
-            if data.input == '': 
-                return []
 
         if data.input_image != '' and data.type == 'avatar':
             try:
@@ -121,9 +114,8 @@ class Pipeline:
                 for image in images:
                     image = image.resize(size=(800, 800))
 
-                return [image for image in images if censor.research.check_nudity_one(image)]
+                return images
             except:
-                raise
                 logger.error('Ошибка при скачивании референса, генерирую без референса')
 
         images = self.model.generate(
@@ -137,7 +129,7 @@ class Pipeline:
             num_images=data.num_images
         )
 
-        return [image for image in images if censor.research.check_nudity_one(image)]
+        return images
 
 if __name__ == '__main__':
     pipeline = Pipeline()
