@@ -2,6 +2,8 @@
 
 [![Deploy frontend](https://github.com/Dungeon-MASSters/MASSter/actions/workflows/deploy-frontend.yml/badge.svg)](https://github.com/Dungeon-MASSters/MASSter/actions/workflows/deploy-frontend.yml)
 
+Руководство пользователя и пользовательские сценарии - https://github.com/Dungeon-MASSters/MASSter/blob/main/frontend/MASSter-frontend/README.md
+
 ## Инструкции для локального запуска
 
 http://localhost:8080/ - веб приложение
