@@ -8,6 +8,7 @@ import numpy as np
 import os
 from datetime import timedelta
 import random
+import re
 
 import requests
 from PIL import Image
@@ -58,11 +59,14 @@ class Translator:
         # if check_profanity_ru(text):
         #     return ''
         try:
-            text = argostranslate.translate.translate(text, self.from_code, self.to_code)
+            new_text = argostranslate.translate.translate(text, self.from_code, self.to_code)
+            if re.search(new_text, r'[A-Za-z]') is None:
+                return text
         except:
             logger.error(f'Ошибка при переводе текста: {text}')
+            return text
 
-        return text
+        return new_text
     
 class VideoParser:
 
