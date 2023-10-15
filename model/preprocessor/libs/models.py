@@ -15,6 +15,7 @@ from transformers import BlipProcessor, BlipForConditionalGeneration, pipeline
 import torch
 import shutil
 from libs import logger
+import censor.research
 
 class Translator:
     def __init__(self) -> None:
@@ -31,6 +32,9 @@ class Translator:
         argostranslate.package.install_from_path(package_to_install.download())
 
     def translate(self, text: str) -> str:
+        
+        if censor.research.check_profanity_ru(text):
+            return ''
         try:
             text = argostranslate.translate.translate(text, self.from_code, self.to_code)
         except:
